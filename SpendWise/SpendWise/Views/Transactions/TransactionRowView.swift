@@ -7,6 +7,8 @@ struct TransactionRowView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: Theme.spacing) {
+            iconBadge
+
             VStack(alignment: .leading, spacing: 6) {
                 Text(transaction.title)
                     .font(Theme.subtitleFont)
@@ -22,11 +24,30 @@ struct TransactionRowView: View {
 
             Spacer(minLength: Theme.compactSpacing)
 
-            Text(amountString)
-                .font(Theme.subtitleFont)
-                .foregroundStyle(transaction.type == .income ? Theme.income : Theme.expense)
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(amountString)
+                    .font(Theme.subtitleFont)
+                    .foregroundStyle(transaction.type == .income ? Theme.income : Theme.expense)
+                if transaction.isRecurring {
+                    Text("Recurring")
+                        .font(Theme.captionFont)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
         }
         .padding(.vertical, 8)
+    }
+
+    private var iconBadge: some View {
+        ZStack {
+            Circle()
+                .fill(badgeBackground)
+                .frame(width: 36, height: 36)
+            Image(systemName: iconName)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(badgeForeground)
+        }
+        .accessibilityHidden(true)
     }
 
     private var categoryBadge: some View {
@@ -52,6 +73,35 @@ struct TransactionRowView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: transaction.date)
+    }
+
+    private var iconName: String {
+        switch transaction.category {
+        case .salary:
+            return "briefcase.fill"
+        case .food:
+            return "fork.knife"
+        case .transport:
+            return "car.fill"
+        case .entertainment:
+            return "sparkles"
+        case .utilities:
+            return "bolt.fill"
+        case .shopping:
+            return "bag.fill"
+        case .health:
+            return "heart.fill"
+        case .other:
+            return "tag.fill"
+        }
+    }
+
+    private var badgeBackground: Color {
+        transaction.type == .income ? Theme.incomeSoft : Theme.expenseSoft
+    }
+
+    private var badgeForeground: Color {
+        transaction.type == .income ? Theme.income : Theme.expense
     }
 }
 

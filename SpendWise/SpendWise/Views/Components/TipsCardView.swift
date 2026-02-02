@@ -5,7 +5,9 @@ struct TipsCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-            HStack {
+            HStack(spacing: 8) {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .foregroundStyle(Theme.accent)
                 Text("Exchange Rates")
                     .font(Theme.subtitleFont)
                     .foregroundStyle(Theme.textPrimary)
@@ -14,6 +16,8 @@ struct TipsCardView: View {
                     viewModel.fetchTip()
                 }
                 .font(Theme.captionFont)
+                .buttonStyle(.bordered)
+                .tint(Theme.accent)
             }
 
             content

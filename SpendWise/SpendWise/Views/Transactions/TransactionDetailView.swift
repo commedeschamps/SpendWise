@@ -24,7 +24,7 @@ struct TransactionDetailView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, Theme.compactSpacing)
                 }
-                .cardStyle()
+                .cardStyle(background: Theme.elevatedBackground)
             }
             .padding(Theme.spacing)
         }
@@ -46,17 +46,27 @@ struct TransactionDetailView: View {
 
     private var detailCard: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-            Text(currentTransaction.title)
-                .font(Theme.titleFont)
-                .foregroundStyle(Theme.textPrimary)
-
-            Text("\(currentTransaction.category.title) - \(dateString)")
-                .font(Theme.bodyFont)
-                .foregroundStyle(Theme.textSecondary)
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(currentTransaction.title)
+                        .font(Theme.titleFont)
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("\(currentTransaction.category.title) - \(dateString)")
+                        .font(Theme.captionFont)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                Spacer()
+                Text(currentTransaction.type.title)
+                    .font(Theme.captionFont.weight(.semibold))
+                    .foregroundStyle(currentTransaction.type == .income ? Theme.income : Theme.expense)
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background(currentTransaction.type == .income ? Theme.incomeSoft : Theme.expenseSoft)
+                    .clipShape(Capsule())
+            }
 
             Divider()
 
-            detailRow(label: "Type", value: currentTransaction.type.title)
             detailRow(label: "Amount", value: Currency.format(currentTransaction.amount, code: currencyCode))
             detailRow(label: "Recurring", value: currentTransaction.isRecurring ? "Yes" : "No")
             detailRow(label: "Created", value: createdDateString)
@@ -80,7 +90,7 @@ struct TransactionDetailView: View {
                 .foregroundStyle(Theme.textSecondary)
             Spacer()
             Text(value)
-                .font(Theme.subtitleFont)
+                .font(Theme.bodyFont.weight(.semibold))
                 .foregroundStyle(Theme.textPrimary)
         }
     }

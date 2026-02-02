@@ -18,6 +18,7 @@ struct TransactionListView: View {
                 if case .loading = viewModel.uiState {
                     Section {
                         ProgressView("Syncing transactions...")
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
 
@@ -34,6 +35,7 @@ struct TransactionListView: View {
                         .font(Theme.bodyFont)
                         .foregroundStyle(Theme.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .listRowBackground(Color.clear)
                 } else {
                     section(title: "Overdue", items: overdueTransactions)
                     section(title: "This Month", items: upcomingThisMonth)
@@ -120,20 +122,21 @@ struct TransactionListView: View {
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(Theme.separator.opacity(0.2), lineWidth: 1)
+                    .stroke(Theme.separator.opacity(0.18), lineWidth: 1)
             )
     }
 
     private func section(title: String, items: [Transaction]) -> some View {
         guard !items.isEmpty else { return AnyView(EmptyView()) }
         return AnyView(
-            Section(header: Text(title)) {
+            Section(header: Text(title).font(Theme.captionFont).foregroundStyle(Theme.textSecondary)) {
                 ForEach(items) { transaction in
                     NavigationLink {
                         TransactionDetailView(transaction: transaction, viewModel: viewModel)
                     } label: {
                         TransactionRowView(transaction: transaction)
                     }
+                    .listRowBackground(Theme.cardBackground)
                 }
                 .onDelete { offsets in
                     delete(offsets, in: items)
@@ -189,7 +192,7 @@ struct TransactionListView: View {
         .clipShape(Capsule())
         .overlay(
             Capsule()
-                .stroke(Theme.separator.opacity(0.2), lineWidth: 1)
+                .stroke(Theme.separator.opacity(0.18), lineWidth: 1)
         )
         .padding(.horizontal, Theme.spacing)
     }

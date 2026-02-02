@@ -23,10 +23,25 @@ struct SummaryCardView: View {
 
             Text(formattedAmount)
                 .font(isHero ? Theme.heroAmountFont : Theme.amountFont)
-                .foregroundStyle(color)
+                .foregroundStyle(isHero ? Theme.textPrimary : color)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+                .allowsTightening(true)
+                .layoutPriority(1)
                 .animation(.easeInOut(duration: 0.2), value: amount)
         }
-        .cardStyle()
+        .cardStyle(background: isHero ? heroBackground : AnyShapeStyle(Theme.cardBackground))
+    }
+
+    private var heroBackground: AnyShapeStyle {
+        AnyShapeStyle(
+            LinearGradient(
+                colors: [Theme.accentSoft, Theme.accentSoft.opacity(0.6)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
     }
 
     private var formattedAmount: String {

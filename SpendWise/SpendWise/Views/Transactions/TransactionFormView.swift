@@ -30,8 +30,14 @@ struct TransactionFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Details") {
+                Section(
+                    header: Text("Details"),
+                    footer: Text("Title and amount are required.")
+                        .font(Theme.captionFont)
+                        .foregroundStyle(Theme.textSecondary)
+                ) {
                     TextField("Title", text: $title)
+                        .textInputAutocapitalization(.sentences)
                     TextField("Amount", text: $amountText)
                         .keyboardType(.decimalPad)
                     DatePicker("Date", selection: $date, displayedComponents: [.date])
@@ -61,7 +67,7 @@ struct TransactionFormView: View {
                 if let validationMessage {
                     Section {
                         Text(validationMessage)
-                            .font(Theme.bodyFont)
+                            .font(Theme.captionFont)
                             .foregroundStyle(Theme.expense)
                     }
                 }
@@ -87,6 +93,7 @@ struct TransactionFormView: View {
                     }
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
         }
     }
 
