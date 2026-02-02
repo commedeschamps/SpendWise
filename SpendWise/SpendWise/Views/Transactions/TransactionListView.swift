@@ -1,0 +1,153 @@
+import SwiftUI
+
+struct TransactionListView: View {
+    @ObservedObject var viewModel: TransactionViewModel
+    @State private var showingAddForm = false
+
+    var body: some View {
+        VStack(spacing: Theme.compactSpacing) {
+            filterBar
+
+            List {
+                if case .loading = viewModel.uiState {
+                    Section {
+                        ProgressView("Syncing transactions...")
+                    }
+                }
+
+                if case .error(let message) = viewModel.uiState {
+                    Section {
+                        Text(message)
+                            .font(Theme.bodyFont)
+                            .foregroundStyle(Theme.expense)
+                    }
+                }
+
+                if overdueTransactions.isEmpty && upcomingThisMonth.isEmpty && olderTransactions.isEmpty {
+                    Text("No transactions yet.")
+                        .font(Theme.bodyFont)
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else {
+                    section(title: "Overdue", items: overdueTransactions)
+                    section(title: "This Month", items: upcomingThisMonth)
+                    section(title: "Older", items: olderTransactions)
+                }
+            }
+            .listStyle(.insetGrouped)
+        }
+        .navigationTitle("Transactions")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingAddForm = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddForm) {
+            TransactionFormView(isPresented: $showingAddForm) { transaction in
+                viewModel.addTransaction(transaction)
+            }
+        }
+    }
+
+    private var filterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Theme.compactSpacing) {
+                Menu {
+                    Picker("Filter", selection: $viewModel.filterMode) {
+                        ForEach(FilterMode.allCases) { mode in
+                            Text(mode.title).tag(mode)
+                        }
+                    }
+                } label: {
+                    Label("Filter: \(viewModel.filterMode.title)", systemImage: "line.3.horizontal.decrease.circle")
+                        .font(Theme.bodyFont)
+                }
+
+                Menu {
+                    Picker("Category", selection: $viewModel.selectedCategory) {
+                        Text("All Categories").tag(Category?.none)
+                        ForEach(Category.allCases) { category in
+                            Text(category.title).tag(Optional(category))
+                        }
+                    }
+                } label: {
+                    Label("Category", systemImage: "tag")
+                        .font(Theme.bodyFont)
+                }
+
+                Menu {
+                    Picker("Sort", selection: $viewModel.sortMode) {
+                        ForEach(SortMode.allCases) { mode in
+                            Text(mode.title).tag(mode)
+                        }
+                    }
+                } label: {
+                    Label("Sort", systemImage: "arrow.up.arrow.down")
+                        .font(Theme.bodyFont)
+                }
+            }
+            .padding(.horizontal, Theme.spacing)
+            .padding(.vertical, Theme.compactSpacing)
+        }
+    }
+
+    private func section(title: String, items: [Transaction]) -> some View {
+        guard !items.isEmpty else { return AnyView(EmptyView()) }
+        return AnyView(
+            Section(header: Text(title)) {
+                ForEach(items) { transaction in
+                    NavigationLink {
+                        TransactionDetailView(transaction: transaction, viewModel: viewModel)
+                    } label: {
+                        TransactionRowView(transaction: transaction)
+                    }
+                }
+                .onDelete { offsets in
+                    delete(offsets, in: items)
+                }
+            }
+        )
+    }
+
+    private func delete(_ offsets: IndexSet, in items: [Transaction]) {
+        for index in offsets {
+            viewModel.deleteTransaction(id: items[index].id)
+        }
+    }
+
+    private var overdueTransactions: [Transaction] {
+        let calendar = Calendar.current
+        guard let monthInterval = calendar.dateInterval(of: .month, for: Date()) else { return [] }
+        let today = calendar.startOfDay(for: Date())
+
+        return viewModel.filteredTransactions
+            .filter { $0.date >= monthInterval.start && $0.date < today }
+    }
+
+    private var upcomingThisMonth: [Transaction] {
+        let calendar = Calendar.current
+        guard let monthInterval = calendar.dateInterval(of: .month, for: Date()) else { return [] }
+        let today = calendar.startOfDay(for: Date())
+
+        return viewModel.filteredTransactions
+            .filter { $0.date >= today && $0.date < monthInterval.end }
+    }
+
+    private var olderTransactions: [Transaction] {
+        let calendar = Calendar.current
+        guard let monthInterval = calendar.dateInterval(of: .month, for: Date()) else { return [] }
+
+        return viewModel.filteredTransactions
+            .filter { $0.date < monthInterval.start }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        TransactionListView(viewModel: TransactionViewModel())
+    }
+}
