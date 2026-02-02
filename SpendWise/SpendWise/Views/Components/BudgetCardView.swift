@@ -8,9 +8,15 @@ struct BudgetCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-            Text("Budget Usage")
-                .font(Theme.captionFont)
-                .foregroundStyle(Theme.textSecondary)
+            HStack {
+                Text("Budget Usage")
+                    .font(Theme.captionFont)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Text("\(Int(progress * 100))%")
+                    .font(Theme.captionFont.weight(.semibold))
+                    .foregroundStyle(progress >= 1 ? Theme.expense : Theme.textSecondary)
+            }
 
             ProgressBarView(progress: progress)
                 .frame(height: 10)

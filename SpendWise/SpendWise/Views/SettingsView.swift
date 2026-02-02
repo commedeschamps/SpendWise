@@ -29,6 +29,28 @@ struct SettingsView: View {
                 }
 
                 Section(
+                    header: Text("Category Budgets"),
+                    footer: Text("Set a limit per category. Use 0 to disable.")
+                        .font(Theme.captionFont)
+                        .foregroundStyle(Theme.textSecondary)
+                ) {
+                    ForEach(Category.allCases) { category in
+                        HStack {
+                            Text(category.title)
+                                .font(Theme.bodyFont)
+                            Spacer()
+                            TextField("0", value: CategoryBudgetStore.binding(for: category), format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 110)
+                            Text(Currency.symbol(for: currencyCode))
+                                .font(Theme.captionFont)
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+                    }
+                }
+
+                Section(
                     footer: Text("Tip: set a realistic budget to see accurate usage in Home.")
                         .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)

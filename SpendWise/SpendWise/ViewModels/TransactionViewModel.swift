@@ -42,6 +42,16 @@ final class TransactionViewModel: ObservableObject {
 
     func addTransaction(_ transaction: Transaction) {
         uiState = .loading
+        let previous = transactions
+        var updated = transactions
+        if let index = updated.firstIndex(where: { $0.id == transaction.id }) {
+            updated[index] = transaction
+        } else {
+            updated.append(transaction)
+        }
+        withAnimation(.spring()) {
+            transactions = updated
+        }
         repository.addTransaction(transaction) { [weak self] result in
             guard let self else { return }
             Task { @MainActor [weak self] in
@@ -50,6 +60,9 @@ final class TransactionViewModel: ObservableObject {
                 case .success:
                     self.uiState = .success
                 case .failure(let error):
+                    withAnimation(.spring()) {
+                        self.transactions = previous
+                    }
                     self.uiState = .error(error.localizedDescription)
                 }
             }
@@ -58,6 +71,16 @@ final class TransactionViewModel: ObservableObject {
 
     func updateTransaction(_ transaction: Transaction) {
         uiState = .loading
+        let previous = transactions
+        var updated = transactions
+        if let index = updated.firstIndex(where: { $0.id == transaction.id }) {
+            updated[index] = transaction
+        } else {
+            updated.append(transaction)
+        }
+        withAnimation(.spring()) {
+            transactions = updated
+        }
         repository.updateTransaction(transaction) { [weak self] result in
             guard let self else { return }
             Task { @MainActor [weak self] in
@@ -66,6 +89,9 @@ final class TransactionViewModel: ObservableObject {
                 case .success:
                     self.uiState = .success
                 case .failure(let error):
+                    withAnimation(.spring()) {
+                        self.transactions = previous
+                    }
                     self.uiState = .error(error.localizedDescription)
                 }
             }
@@ -74,6 +100,12 @@ final class TransactionViewModel: ObservableObject {
 
     func deleteTransaction(id: String) {
         uiState = .loading
+        let previous = transactions
+        var updated = transactions
+        updated.removeAll { $0.id == id }
+        withAnimation(.spring()) {
+            transactions = updated
+        }
         repository.deleteTransaction(id: id) { [weak self] result in
             guard let self else { return }
             Task { @MainActor [weak self] in
@@ -82,6 +114,9 @@ final class TransactionViewModel: ObservableObject {
                 case .success:
                     self.uiState = .success
                 case .failure(let error):
+                    withAnimation(.spring()) {
+                        self.transactions = previous
+                    }
                     self.uiState = .error(error.localizedDescription)
                 }
             }

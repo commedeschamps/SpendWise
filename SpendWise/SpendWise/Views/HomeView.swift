@@ -63,9 +63,9 @@ struct HomeView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("SpendWise")
-                .font(Theme.titleFont)
+                .font(Theme.largeTitleFont)
                 .foregroundStyle(Theme.textPrimary)
             Text("This month")
                 .font(Theme.captionFont)

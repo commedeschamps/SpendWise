@@ -28,10 +28,10 @@ struct AnalyticsView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Analytics")
-                .font(Theme.titleFont)
+                .font(Theme.largeTitleFont)
                 .foregroundStyle(Theme.textPrimary)
 
-            HStack {
+            HStack(spacing: 12) {
                 Text(period.title)
                     .font(Theme.captionFont)
                     .foregroundStyle(Theme.textSecondary)
@@ -44,7 +44,7 @@ struct AnalyticsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(maxWidth: 220)
+                .frame(maxWidth: 240)
             }
         }
     }
@@ -72,6 +72,11 @@ struct AnalyticsView: View {
             Text(Currency.format(value, code: currencyCode))
                 .font(Theme.amountFont)
                 .foregroundStyle(color)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .allowsTightening(true)
+                .layoutPriority(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -91,6 +96,7 @@ struct AnalyticsView: View {
                     CategoryBarRow(
                         category: item.category.title,
                         amount: item.total,
+                        budget: CategoryBudgetStore.budget(for: item.category),
                         maxAmount: maxExpenseTotal,
                         currencyCode: currencyCode
                     )
@@ -237,6 +243,7 @@ private struct CategoryTotal: Identifiable {
 private struct CategoryBarRow: View {
     let category: String
     let amount: Double
+    let budget: Double
     let maxAmount: Double
     let currencyCode: String
 
@@ -247,7 +254,7 @@ private struct CategoryBarRow: View {
                     .font(Theme.bodyFont)
                     .foregroundStyle(Theme.textPrimary)
                 Spacer()
-                Text(Currency.format(amount, code: currencyCode))
+                Text(amountLabel)
                     .font(Theme.captionFont)
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -257,18 +264,38 @@ private struct CategoryBarRow: View {
                     Capsule()
                         .fill(Theme.separator.opacity(0.15))
                     Capsule()
-                        .fill(Theme.expense)
+                        .fill(barColor)
                         .frame(width: proxy.size.width * CGFloat(progress))
                 }
             }
             .frame(height: 8)
             .animation(.easeInOut(duration: 0.3), value: amount)
+
+            if budget > 0 && amount > budget {
+                Text("Over budget")
+                    .font(Theme.captionFont)
+                    .foregroundStyle(Theme.expense)
+            }
         }
     }
 
     private var progress: Double {
+        if budget > 0 {
+            return min(amount / budget, 1)
+        }
         guard maxAmount > 0 else { return 0 }
         return min(amount / maxAmount, 1)
+    }
+
+    private var barColor: Color {
+        budget > 0 && amount > budget ? Theme.expense : Theme.accent
+    }
+
+    private var amountLabel: String {
+        if budget > 0 {
+            return "\(Currency.format(amount, code: currencyCode)) / \(Currency.format(budget, code: currencyCode))"
+        }
+        return Currency.format(amount, code: currencyCode)
     }
 }
 
