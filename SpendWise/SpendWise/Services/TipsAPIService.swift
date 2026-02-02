@@ -1,23 +1,43 @@
 import Foundation
 
 struct TipsAPIService {
-    private let endpoint = URL(string: "https://api.quotable.io/random")!
+    private let endpoint = URL(string: "https://open.er-api.com/v6/latest/USD")!
 
     func fetchTip() async throws -> Tip {
-        let (data, _) = try await URLSession.shared.data(from: endpoint)
-        let response = try JSONDecoder().decode(TipResponse.self, from: data)
-        return Tip(id: response.id, text: response.content, author: response.author)
+        let (data, response) = try await URLSession.shared.data(from: endpoint)
+        if let httpResponse = response as? HTTPURLResponse,
+           !(200...299).contains(httpResponse.statusCode) {
+            throw URLError(.badServerResponse)
+        }
+
+        let payload = try JSONDecoder().decode(ExchangeRatesResponse.self, from: data)
+
+        guard let kzt = payload.rates["KZT"],
+              let eur = payload.rates["EUR"],
+              let rub = payload.rates["RUB"] else {
+            throw URLError(.cannotParseResponse)
+        }
+
+        let text = [
+            formatRate(usd: 1, to: kzt, currency: "KZT"),
+            formatRate(usd: 1, to: eur, currency: "EUR"),
+            formatRate(usd: 1, to: rub, currency: "RUB")
+        ].joined(separator: "\n")
+
+        return Tip(id: UUID().uuidString, text: text, author: "ExchangeRate-API")
+    }
+
+    private func formatRate(usd: Double, to rate: Double, currency: String) -> String {
+        String(format: "%.0f USD = %.2f %@", usd, rate, currency)
     }
 }
 
-private struct TipResponse: Codable {
-    let id: String
-    let content: String
-    let author: String
+private struct ExchangeRatesResponse: Codable {
+    let baseCode: String
+    let rates: [String: Double]
 
     private enum CodingKeys: String, CodingKey {
-        case id = "_id"
-        case content
-        case author
+        case baseCode = "base_code"
+        case rates
     }
 }
