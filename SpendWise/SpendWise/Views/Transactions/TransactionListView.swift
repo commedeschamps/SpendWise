@@ -3,10 +3,16 @@ import SwiftUI
 struct TransactionListView: View {
     @ObservedObject var viewModel: TransactionViewModel
     @State private var showingAddForm = false
+    @State private var showSyncBanner = false
 
     var body: some View {
         VStack(spacing: Theme.compactSpacing) {
             filterBar
+
+            if showSyncBanner, let lastSync = viewModel.lastSync {
+                syncBanner(date: lastSync)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
 
             List {
                 if case .loading = viewModel.uiState {
@@ -49,6 +55,18 @@ struct TransactionListView: View {
         .sheet(isPresented: $showingAddForm) {
             TransactionFormView(isPresented: $showingAddForm) { transaction in
                 viewModel.addTransaction(transaction)
+            }
+        }
+        .onChange(of: viewModel.uiState) { state in
+            if case .success = state {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showSyncBanner = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showSyncBanner = false
+                    }
+                }
             }
         }
     }
@@ -154,6 +172,32 @@ struct TransactionListView: View {
 
         return viewModel.filteredTransactions
             .filter { $0.date < monthInterval.start }
+    }
+
+    private func syncBanner(date: Date) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(Theme.income)
+            Text("Synced \(relativeDateString(from: date))")
+                .font(Theme.captionFont)
+                .foregroundStyle(Theme.textSecondary)
+            Spacer()
+        }
+        .padding(.horizontal, Theme.spacing)
+        .padding(.vertical, Theme.compactSpacing)
+        .background(Theme.cardBackground)
+        .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(Theme.separator.opacity(0.2), lineWidth: 1)
+        )
+        .padding(.horizontal, Theme.spacing)
+    }
+
+    private func relativeDateString(from date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
 

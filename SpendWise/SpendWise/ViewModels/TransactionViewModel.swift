@@ -6,6 +6,7 @@ import SwiftUI
 final class TransactionViewModel: ObservableObject {
     @Published private(set) var transactions: [Transaction] = []
     @Published var uiState: UIState = .idle
+    @Published var lastSync: Date?
     @Published var filterMode: FilterMode = .all
     @Published var sortMode: SortMode = .dateDesc
     @Published var selectedCategory: Category? = nil
@@ -30,6 +31,7 @@ final class TransactionViewModel: ObservableObject {
                     withAnimation(.spring()) {
                         self.transactions = items
                     }
+                    self.lastSync = Date()
                     self.uiState = .success
                 case .failure(let error):
                     self.uiState = .error(error.localizedDescription)
