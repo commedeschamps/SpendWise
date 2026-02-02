@@ -18,6 +18,13 @@ struct RootTabView: View {
                 Label("Transactions", systemImage: "list.bullet.rectangle")
             }
 
+            NavigationStack {
+                AnalyticsView(viewModel: transactionsViewModel)
+            }
+            .tabItem {
+                Label("Analytics", systemImage: "chart.bar.xaxis")
+            }
+
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")

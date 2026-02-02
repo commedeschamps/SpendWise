@@ -4,7 +4,7 @@ struct BudgetCardView: View {
     let progress: Double
     let spent: Double
     let budget: Double
-    let currencySymbol: String
+    let currencyCode: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
@@ -29,12 +29,12 @@ struct BudgetCardView: View {
     }
 
     private func formatted(_ value: Double) -> String {
-        "\(currencySymbol)\(String(format: "%.2f", value))"
+        Currency.format(value, code: currencyCode)
     }
 }
 
 #Preview {
-    BudgetCardView(progress: 0.45, spent: 900, budget: 2000, currencySymbol: "$")
+    BudgetCardView(progress: 0.45, spent: 900, budget: 2000, currencyCode: "KZT")
         .padding()
         .background(Theme.background)
 }

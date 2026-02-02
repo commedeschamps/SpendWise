@@ -4,7 +4,7 @@ struct TransactionDetailView: View {
     let transaction: Transaction
     @ObservedObject var viewModel: TransactionViewModel
 
-    @AppStorage("currencySymbol") private var currencySymbol = "$"
+    @AppStorage("currencyCode") private var currencyCode = "KZT"
     @State private var showingEditForm = false
 
     var body: some View {
@@ -57,7 +57,7 @@ struct TransactionDetailView: View {
             Divider()
 
             detailRow(label: "Type", value: currentTransaction.type.title)
-            detailRow(label: "Amount", value: "\(currencySymbol)\(String(format: "%.2f", currentTransaction.amount))")
+            detailRow(label: "Amount", value: Currency.format(currentTransaction.amount, code: currencyCode))
             detailRow(label: "Recurring", value: currentTransaction.isRecurring ? "Yes" : "No")
             detailRow(label: "Created", value: createdDateString)
 

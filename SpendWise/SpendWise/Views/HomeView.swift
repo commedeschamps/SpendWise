@@ -4,7 +4,7 @@ struct HomeView: View {
     @ObservedObject var viewModel: TransactionViewModel
     @ObservedObject var tipsViewModel: TipsViewModel
 
-    @AppStorage("currencySymbol") private var currencySymbol = "$"
+    @AppStorage("currencyCode") private var currencyCode = "KZT"
     @AppStorage("monthlyBudget") private var monthlyBudget = 2000.0
 
     @State private var animatedProgress: Double = 0
@@ -17,7 +17,7 @@ struct HomeView: View {
                 SummaryCardView(
                     title: "Balance",
                     amount: viewModel.balance,
-                    currencySymbol: currencySymbol,
+                    currencyCode: currencyCode,
                     color: Theme.accent,
                     isHero: true
                 )
@@ -26,14 +26,14 @@ struct HomeView: View {
                     SummaryCardView(
                         title: "Income",
                         amount: viewModel.incomeThisMonth,
-                        currencySymbol: currencySymbol,
+                        currencyCode: currencyCode,
                         color: Theme.income
                     )
 
                     SummaryCardView(
                         title: "Expenses",
                         amount: viewModel.expenseThisMonth,
-                        currencySymbol: currencySymbol,
+                        currencyCode: currencyCode,
                         color: Theme.expense
                     )
                 }
@@ -42,7 +42,7 @@ struct HomeView: View {
                     progress: animatedProgress,
                     spent: viewModel.expenseThisMonth,
                     budget: monthlyBudget,
-                    currencySymbol: currencySymbol
+                    currencyCode: currencyCode
                 )
 
                 TipsCardView(viewModel: tipsViewModel)

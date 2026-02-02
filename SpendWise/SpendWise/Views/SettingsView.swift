@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("currencySymbol") private var currencySymbol = "$"
+    @AppStorage("currencyCode") private var currencyCode = "KZT"
     @AppStorage("monthStartDay") private var monthStartDay = 1
     @AppStorage("monthlyBudget") private var monthlyBudget = 2000.0
 
@@ -14,9 +14,11 @@ struct SettingsView: View {
                         .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
                 ) {
-                    TextField("Currency Symbol", text: $currencySymbol)
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
+                    Picker("Currency", selection: $currencyCode) {
+                        ForEach(Currency.options) { option in
+                            Text("\(option.code) - \(option.name)").tag(option.code)
+                        }
+                    }
 
                     Stepper(value: $monthStartDay, in: 1...28) {
                         Text("Monthly Start Day: \(monthStartDay)")
@@ -35,6 +37,17 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+        }
+        .onAppear(perform: migrateLegacyCurrency)
+    }
+
+    private func migrateLegacyCurrency() {
+        guard currencyCode.isEmpty,
+              let legacySymbol = UserDefaults.standard.string(forKey: "currencySymbol") else {
+            return
+        }
+        if let mapped = Currency.code(fromSymbol: legacySymbol) {
+            currencyCode = mapped
         }
     }
 }

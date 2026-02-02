@@ -3,14 +3,14 @@ import SwiftUI
 struct SummaryCardView: View {
     let title: String
     let amount: Double
-    let currencySymbol: String
+    let currencyCode: String
     let color: Color
     let isHero: Bool
 
-    init(title: String, amount: Double, currencySymbol: String, color: Color, isHero: Bool = false) {
+    init(title: String, amount: Double, currencyCode: String, color: Color, isHero: Bool = false) {
         self.title = title
         self.amount = amount
-        self.currencySymbol = currencySymbol
+        self.currencyCode = currencyCode
         self.color = color
         self.isHero = isHero
     }
@@ -32,12 +32,12 @@ struct SummaryCardView: View {
     private var formattedAmount: String {
         let sign = amount < 0 ? "-" : ""
         let value = abs(amount)
-        return "\(sign)\(currencySymbol)\(String(format: "%.2f", value))"
+        return "\(sign)\(Currency.format(value, code: currencyCode))"
     }
 }
 
 #Preview {
-    SummaryCardView(title: "Balance", amount: 1240, currencySymbol: "$", color: Theme.accent, isHero: true)
+    SummaryCardView(title: "Balance", amount: 1240, currencyCode: "KZT", color: Theme.accent, isHero: true)
         .padding()
         .background(Theme.background)
 }

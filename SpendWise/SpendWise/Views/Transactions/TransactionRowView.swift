@@ -3,7 +3,7 @@ import SwiftUI
 struct TransactionRowView: View {
     let transaction: Transaction
 
-    @AppStorage("currencySymbol") private var currencySymbol = "$"
+    @AppStorage("currencyCode") private var currencyCode = "KZT"
 
     var body: some View {
         HStack(alignment: .top, spacing: Theme.spacing) {
@@ -44,13 +44,8 @@ struct TransactionRowView: View {
     }
 
     private var amountString: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.minimumFractionDigits = 2
-        formatter.maximumFractionDigits = 2
-        let formatted = formatter.string(from: NSNumber(value: transaction.amount)) ?? String(format: "%.2f", transaction.amount)
         let sign = transaction.type == .expense ? "-" : "+"
-        return "\(sign)\(currencySymbol)\(formatted)"
+        return "\(sign)\(Currency.format(abs(transaction.amount), code: currencyCode))"
     }
 
     private var dateString: String {
