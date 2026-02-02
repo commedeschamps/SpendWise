@@ -341,19 +341,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCSwiftPackageProductDependency section */
-		39D1C5722F30B11A009941B9 /* FirebaseCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = FirebaseCore;
-			package = 39D1C56E2F30B11A009941B9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-		};
-		39D1C5732F30B11A009941B9 /* FirebaseDatabase */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = FirebaseDatabase;
-			package = 39D1C56E2F30B11A009941B9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-		};
-/* End XCSwiftPackageProductDependency section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		39D1C56E2F30B11A009941B9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -364,6 +351,19 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		39D1C5722F30B11A009941B9 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 39D1C56E2F30B11A009941B9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		39D1C5732F30B11A009941B9 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 39D1C56E2F30B11A009941B9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 39D1C5232F30AE60009941B9 /* Project object */;
 }
