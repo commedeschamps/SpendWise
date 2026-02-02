@@ -6,28 +6,51 @@ struct TransactionRowView: View {
     @AppStorage("currencySymbol") private var currencySymbol = "$"
 
     var body: some View {
-        HStack(spacing: Theme.spacing) {
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(alignment: .top, spacing: Theme.spacing) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(transaction.title)
                     .font(Theme.subtitleFont)
                     .foregroundStyle(Theme.textPrimary)
-                Text("\(transaction.category.title) - \(dateString)")
-                    .font(Theme.bodyFont)
-                    .foregroundStyle(Theme.textSecondary)
+
+                HStack(spacing: 6) {
+                    categoryBadge
+                    Text(dateString)
+                        .font(Theme.captionFont)
+                        .foregroundStyle(Theme.textSecondary)
+                }
             }
 
-            Spacer()
+            Spacer(minLength: Theme.compactSpacing)
 
             Text(amountString)
                 .font(Theme.subtitleFont)
                 .foregroundStyle(transaction.type == .income ? Theme.income : Theme.expense)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+    }
+
+    private var categoryBadge: some View {
+        Text(transaction.category.title)
+            .font(Theme.captionFont)
+            .foregroundStyle(Theme.textSecondary)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .background(Theme.elevatedBackground)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(Theme.separator.opacity(0.4), lineWidth: 1)
+            )
     }
 
     private var amountString: String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        let formatted = formatter.string(from: NSNumber(value: transaction.amount)) ?? String(format: "%.2f", transaction.amount)
         let sign = transaction.type == .expense ? "-" : "+"
-        return "\(sign)\(currencySymbol)\(String(format: "%.2f", transaction.amount))"
+        return "\(sign)\(currencySymbol)\(formatted)"
     }
 
     private var dateString: String {

@@ -6,30 +6,26 @@ struct TipsCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
             HStack {
-                Text("Daily Tip")
+                Text("Exchange Rates")
                     .font(Theme.subtitleFont)
-                    .foregroundStyle(Theme.textSecondary)
+                    .foregroundStyle(Theme.textPrimary)
                 Spacer()
-                Button("Refresh") {
+                Button("Update") {
                     viewModel.fetchTip()
                 }
-                .font(Theme.bodyFont)
+                .font(Theme.captionFont)
             }
 
             content
         }
-        .padding(Theme.spacing)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-        .shadow(color: Theme.cardShadow, radius: 10, x: 0, y: 8)
+        .cardStyle()
     }
 
     @ViewBuilder
     private var content: some View {
         switch viewModel.state {
         case .idle:
-            Text("Tap refresh for a new tip.")
+            Text("Tap update to fetch the latest rates.")
                 .font(Theme.bodyFont)
                 .foregroundStyle(Theme.textSecondary)
         case .loading:
@@ -37,21 +33,22 @@ struct TipsCardView: View {
         case .success:
             if let tip = viewModel.tip {
                 VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-                    Text("\"\(tip.text)\"")
-                        .font(Theme.bodyFont)
+                    Text(tip.text)
+                        .font(.system(.callout, design: .monospaced))
                         .foregroundStyle(Theme.textPrimary)
-                    Text("- \(tip.author)")
-                        .font(Theme.bodyFont)
+                        .lineSpacing(4)
+                    Text(tip.author)
+                        .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
                 }
             } else {
-                Text("No tip available.")
+                Text("No rates available.")
                     .font(Theme.bodyFont)
                     .foregroundStyle(Theme.textSecondary)
             }
         case .error(let message):
             VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-                Text("Couldn't load tip")
+                Text("Couldn't load rates")
                     .font(Theme.subtitleFont)
                 Text(message)
                     .font(Theme.bodyFont)

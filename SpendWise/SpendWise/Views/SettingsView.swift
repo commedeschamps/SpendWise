@@ -8,7 +8,12 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Preferences") {
+                Section(
+                    header: Text("Preferences"),
+                    footer: Text("These settings are stored locally on this device.")
+                        .font(Theme.captionFont)
+                        .foregroundStyle(Theme.textSecondary)
+                ) {
                     TextField("Currency Symbol", text: $currencySymbol)
                         .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()
@@ -21,10 +26,12 @@ struct SettingsView: View {
                         .keyboardType(.decimalPad)
                 }
 
-                Section {
-                    Text("Settings are stored locally using UserDefaults.")
-                        .font(Theme.bodyFont)
+                Section(
+                    footer: Text("Tip: set a realistic budget to see accurate usage in Home.")
+                        .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
+                ) {
+                    EmptyView()
                 }
             }
             .navigationTitle("Settings")

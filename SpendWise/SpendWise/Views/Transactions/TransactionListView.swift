@@ -63,8 +63,7 @@ struct TransactionListView: View {
                         }
                     }
                 } label: {
-                    Label("Filter: \(viewModel.filterMode.title)", systemImage: "line.3.horizontal.decrease.circle")
-                        .font(Theme.bodyFont)
+                    chipLabel(title: viewModel.filterMode.title, systemImage: "line.3.horizontal.decrease.circle")
                 }
 
                 Menu {
@@ -75,8 +74,7 @@ struct TransactionListView: View {
                         }
                     }
                 } label: {
-                    Label("Category", systemImage: "tag")
-                        .font(Theme.bodyFont)
+                    chipLabel(title: viewModel.selectedCategory?.title ?? "All Categories", systemImage: "tag")
                 }
 
                 Menu {
@@ -86,13 +84,26 @@ struct TransactionListView: View {
                         }
                     }
                 } label: {
-                    Label("Sort", systemImage: "arrow.up.arrow.down")
-                        .font(Theme.bodyFont)
+                    chipLabel(title: viewModel.sortMode.title, systemImage: "arrow.up.arrow.down")
                 }
             }
             .padding(.horizontal, Theme.spacing)
             .padding(.vertical, Theme.compactSpacing)
         }
+    }
+
+    private func chipLabel(title: String, systemImage: String) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(Theme.captionFont)
+            .foregroundStyle(Theme.textPrimary)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .background(Theme.cardBackground)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(Theme.separator.opacity(0.2), lineWidth: 1)
+            )
     }
 
     private func section(title: String, items: [Transaction]) -> some View {

@@ -8,8 +8,8 @@ struct BudgetCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-            Text("Monthly Budget")
-                .font(Theme.subtitleFont)
+            Text("Budget Usage")
+                .font(Theme.captionFont)
                 .foregroundStyle(Theme.textSecondary)
 
             ProgressBarView(progress: progress)
@@ -25,11 +25,7 @@ struct BudgetCardView: View {
                     .foregroundStyle(Theme.textSecondary)
             }
         }
-        .padding(Theme.spacing)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-        .shadow(color: Theme.cardShadow, radius: 10, x: 0, y: 8)
+        .cardStyle()
     }
 
     private func formatted(_ value: Double) -> String {

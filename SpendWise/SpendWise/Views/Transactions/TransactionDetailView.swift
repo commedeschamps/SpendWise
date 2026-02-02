@@ -24,9 +24,7 @@ struct TransactionDetailView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, Theme.compactSpacing)
                 }
-                .background(Theme.cardBackground)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-                .shadow(color: Theme.cardShadow, radius: 10, x: 0, y: 8)
+                .cardStyle()
             }
             .padding(Theme.spacing)
         }
@@ -72,11 +70,7 @@ struct TransactionDetailView: View {
                     .foregroundStyle(Theme.textSecondary)
             }
         }
-        .padding(Theme.spacing)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-        .shadow(color: Theme.cardShadow, radius: 10, x: 0, y: 8)
+        .cardStyle()
     }
 
     private func detailRow(label: String, value: String) -> some View {

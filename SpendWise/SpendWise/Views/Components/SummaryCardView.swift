@@ -5,22 +5,28 @@ struct SummaryCardView: View {
     let amount: Double
     let currencySymbol: String
     let color: Color
+    let isHero: Bool
+
+    init(title: String, amount: Double, currencySymbol: String, color: Color, isHero: Bool = false) {
+        self.title = title
+        self.amount = amount
+        self.currencySymbol = currencySymbol
+        self.color = color
+        self.isHero = isHero
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
             Text(title)
-                .font(Theme.subtitleFont)
+                .font(Theme.captionFont)
                 .foregroundStyle(Theme.textSecondary)
 
             Text(formattedAmount)
-                .font(Theme.titleFont)
+                .font(isHero ? Theme.heroAmountFont : Theme.amountFont)
                 .foregroundStyle(color)
+                .animation(.easeInOut(duration: 0.2), value: amount)
         }
-        .padding(Theme.spacing)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-        .shadow(color: Theme.cardShadow, radius: 10, x: 0, y: 8)
+        .cardStyle()
     }
 
     private var formattedAmount: String {
@@ -31,7 +37,7 @@ struct SummaryCardView: View {
 }
 
 #Preview {
-    SummaryCardView(title: "Balance", amount: 1240, currencySymbol: "$", color: Theme.accent)
+    SummaryCardView(title: "Balance", amount: 1240, currencySymbol: "$", color: Theme.accent, isHero: true)
         .padding()
         .background(Theme.background)
 }

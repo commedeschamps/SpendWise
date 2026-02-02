@@ -12,19 +12,17 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.spacing) {
-                Text("SpendWise")
-                    .font(Theme.titleFont)
-                    .foregroundStyle(Theme.textPrimary)
-                    .padding(.top, Theme.spacing)
+                header
 
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: Theme.spacing)], spacing: Theme.spacing) {
-                    SummaryCardView(
-                        title: "Balance",
-                        amount: viewModel.balance,
-                        currencySymbol: currencySymbol,
-                        color: Theme.accent
-                    )
+                SummaryCardView(
+                    title: "Balance",
+                    amount: viewModel.balance,
+                    currencySymbol: currencySymbol,
+                    color: Theme.accent,
+                    isHero: true
+                )
 
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Theme.spacing) {
                     SummaryCardView(
                         title: "Income",
                         amount: viewModel.incomeThisMonth,
@@ -50,7 +48,7 @@ struct HomeView: View {
                 TipsCardView(viewModel: tipsViewModel)
             }
             .padding(.horizontal, Theme.spacing)
-            .padding(.bottom, Theme.spacing)
+            .padding(.vertical, Theme.spacing)
         }
         .background(Theme.background)
         .onAppear {
@@ -64,9 +62,20 @@ struct HomeView: View {
         }
     }
 
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("SpendWise")
+                .font(Theme.titleFont)
+                .foregroundStyle(Theme.textPrimary)
+            Text("This month")
+                .font(Theme.captionFont)
+                .foregroundStyle(Theme.textSecondary)
+        }
+    }
+
     private func updateProgress() {
         let progress = monthlyBudget > 0 ? min(viewModel.expenseThisMonth / monthlyBudget, 1) : 0
-        withAnimation(.easeInOut(duration: 0.6)) {
+        withAnimation(.easeInOut(duration: 0.35)) {
             animatedProgress = progress
         }
     }
