@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		39D1C5702F30B11A009941B9 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39D1C5722F30B11A009941B9 /* FirebaseCore */; };
 		39D1C5712F30B11A009941B9 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 39D1C5732F30B11A009941B9 /* FirebaseDatabase */; };
+		39D1C5B02F30DC0B009941B9 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 39D1C5AF2F30DC0B009941B9 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				39D1C5B02F30DC0B009941B9 /* Alamofire in Frameworks */,
 				39D1C5702F30B11A009941B9 /* FirebaseCore in Frameworks */,
 				39D1C5712F30B11A009941B9 /* FirebaseDatabase in Frameworks */,
 			);
@@ -74,6 +76,7 @@
 			packageProductDependencies = (
 				39D1C5722F30B11A009941B9 /* FirebaseCore */,
 				39D1C5732F30B11A009941B9 /* FirebaseDatabase */,
+				39D1C5AF2F30DC0B009941B9 /* Alamofire */,
 			);
 			productName = SpendWise;
 			productReference = 39D1C52B2F30AE60009941B9 /* SpendWise.app */;
@@ -105,6 +108,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				39D1C56E2F30B11A009941B9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				39D1C5AE2F30DC0B009941B9 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 39D1C52C2F30AE60009941B9 /* Products */;
@@ -350,6 +354,14 @@
 				minimumVersion = 12.8.0;
 			};
 		};
+		39D1C5AE2F30DC0B009941B9 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.11.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -362,6 +374,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 39D1C56E2F30B11A009941B9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseDatabase;
+		};
+		39D1C5AF2F30DC0B009941B9 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 39D1C5AE2F30DC0B009941B9 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
