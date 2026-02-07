@@ -40,7 +40,7 @@ struct RootTabView: View {
                 Label("Exchange", systemImage: "arrow.left.arrow.right.circle")
             }
 
-            SettingsView()
+            SettingsView(transactionsViewModel: transactionsViewModel)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }

@@ -1,9 +1,15 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @ObservedObject var transactionsViewModel: TransactionViewModel
     @AppStorage("currencyCode") private var currencyCode = "KZT"
     @AppStorage("monthStartDay") private var monthStartDay = 1
     @AppStorage("monthlyBudget") private var monthlyBudget = 2000.0
+    @State private var isRunningDemoAction = false
+    @State private var showLoadDemoConfirmation = false
+    @State private var showClearConfirmation = false
+    @State private var resultMessage = ""
+    @State private var showResultAlert = false
 
     var body: some View {
         NavigationStack {
@@ -80,6 +86,34 @@ struct SettingsView: View {
                 }
 
                 Section(
+                    header: Text("Demo Data"),
+                    footer: Text("Use for presentation and QA. Demo load replaces current transactions.")
+                        .font(Theme.captionFont)
+                        .foregroundStyle(Theme.textSecondary)
+                ) {
+                    Button {
+                        showLoadDemoConfirmation = true
+                    } label: {
+                        HStack {
+                            Label("Load Demo Transactions", systemImage: "wand.and.stars")
+                            Spacer()
+                            if isRunningDemoAction {
+                                ProgressView()
+                                    .scaleEffect(0.85)
+                            }
+                        }
+                    }
+                    .disabled(isRunningDemoAction)
+
+                    Button(role: .destructive) {
+                        showClearConfirmation = true
+                    } label: {
+                        Label("Clear All Transactions", systemImage: "trash")
+                    }
+                    .disabled(isRunningDemoAction || transactionsViewModel.transactions.isEmpty)
+                }
+
+                Section(
                     footer: Text("Tip: set a realistic budget to see accurate usage in Home.")
                         .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
@@ -96,6 +130,31 @@ struct SettingsView: View {
             AppBackgroundView()
         }
         .onAppear(perform: migrateLegacyCurrency)
+        .confirmationDialog(
+            "Replace current transactions?",
+            isPresented: $showLoadDemoConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Replace and Load", role: .destructive, action: loadDemoData)
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This will remove current transactions and add a demo set.")
+        }
+        .confirmationDialog(
+            "Delete all transactions?",
+            isPresented: $showClearConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete All", role: .destructive, action: clearAllData)
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This action cannot be undone.")
+        }
+        .alert("Demo Data", isPresented: $showResultAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(resultMessage)
+        }
     }
 
     private func migrateLegacyCurrency() {
@@ -107,8 +166,41 @@ struct SettingsView: View {
             currencyCode = mapped
         }
     }
+
+    private func loadDemoData() {
+        isRunningDemoAction = true
+        Task { @MainActor in
+            let result = await transactionsViewModel.seedDemoTransactions(replaceExisting: true)
+            isRunningDemoAction = false
+            switch result {
+            case .success(let count):
+                presentResult("Loaded \(count) demo transactions.")
+            case .failure(let error):
+                presentResult("Failed to load demo data: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func clearAllData() {
+        isRunningDemoAction = true
+        Task { @MainActor in
+            let result = await transactionsViewModel.clearAllTransactions()
+            isRunningDemoAction = false
+            switch result {
+            case .success(let count):
+                presentResult("Deleted \(count) transactions.")
+            case .failure(let error):
+                presentResult("Failed to clear transactions: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func presentResult(_ message: String) {
+        resultMessage = message
+        showResultAlert = true
+    }
 }
 
 #Preview {
-    SettingsView()
+    SettingsView(transactionsViewModel: TransactionViewModel())
 }

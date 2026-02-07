@@ -106,6 +106,43 @@ final class TransactionViewModel: ObservableObject {
         updateTransaction(updated)
     }
 
+    func seedDemoTransactions(replaceExisting: Bool = true) async -> Result<Int, Error> {
+        uiState = .loading
+        do {
+            if replaceExisting {
+                for transaction in transactions {
+                    try await deleteTransactionFromRepository(id: transaction.id)
+                }
+            }
+
+            let demoTransactions = Transaction.demoTransactions()
+            for transaction in demoTransactions {
+                try await addTransactionToRepository(transaction)
+            }
+
+            uiState = .success
+            return .success(demoTransactions.count)
+        } catch {
+            uiState = .error(error.localizedDescription)
+            return .failure(error)
+        }
+    }
+
+    func clearAllTransactions() async -> Result<Int, Error> {
+        uiState = .loading
+        let count = transactions.count
+        do {
+            for transaction in transactions {
+                try await deleteTransactionFromRepository(id: transaction.id)
+            }
+            uiState = .success
+            return .success(count)
+        } catch {
+            uiState = .error(error.localizedDescription)
+            return .failure(error)
+        }
+    }
+
     var filteredTransactions: [Transaction] {
         let filtered = transactions
             .filter { transaction in
@@ -185,6 +222,22 @@ final class TransactionViewModel: ObservableObject {
         let startDate = calendar.date(from: startComponents) ?? calendar.startOfDay(for: today)
         let endDate = calendar.date(byAdding: .month, value: 1, to: startDate) ?? today
         return (startDate, endDate)
+    }
+
+    private func addTransactionToRepository(_ transaction: Transaction) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            repository.addTransaction(transaction) { result in
+                continuation.resume(with: result)
+            }
+        }
+    }
+
+    private func deleteTransactionFromRepository(id: String) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            repository.deleteTransaction(id: id) { result in
+                continuation.resume(with: result)
+            }
+        }
     }
 }
 
