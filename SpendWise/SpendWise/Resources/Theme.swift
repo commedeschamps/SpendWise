@@ -11,14 +11,14 @@ enum Theme {
     static let textTertiary = Color(UIColor.tertiaryLabel)
     static let separator = Color(UIColor.separator)
 
-    static let accent = Color(red: 0.06, green: 0.49, blue: 0.45)
-    static let income = Color(red: 0.16, green: 0.67, blue: 0.38)
-    static let expense = Color(red: 0.87, green: 0.33, blue: 0.31)
-    static let accentAlt = Color(red: 0.13, green: 0.57, blue: 0.86)
-    static let ambientTop = Color(red: 0.86, green: 0.96, blue: 0.93)
+    static let accent = Color(red: 0.04, green: 0.54, blue: 0.50)
+    static let income = Color(red: 0.14, green: 0.69, blue: 0.39)
+    static let expense = Color(red: 0.87, green: 0.31, blue: 0.34)
+    static let accentAlt = Color(red: 0.12, green: 0.52, blue: 0.88)
+    static let ambientTop = Color(red: 0.84, green: 0.95, blue: 0.92)
     static let ambientBottom = Color(red: 0.96, green: 0.97, blue: 1.0)
-    static let darkAmbientTop = Color(red: 0.10, green: 0.17, blue: 0.16)
-    static let darkAmbientBottom = Color(red: 0.05, green: 0.08, blue: 0.10)
+    static let darkAmbientTop = Color(red: 0.08, green: 0.15, blue: 0.15)
+    static let darkAmbientBottom = Color(red: 0.04, green: 0.07, blue: 0.10)
 
     static let accentSoft = accent.opacity(0.12)
     static let incomeSoft = income.opacity(0.12)
@@ -26,7 +26,16 @@ enum Theme {
     static let accentGlow = accent.opacity(0.28)
 
     static let heroGradient = LinearGradient(
-        colors: [accent.opacity(0.28), accentAlt.opacity(0.22)],
+        colors: [accent.opacity(0.30), accentAlt.opacity(0.24)],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    static let softCardGradient = LinearGradient(
+        colors: [
+            elevatedBackground.opacity(0.9),
+            elevatedBackground.opacity(0.75)
+        ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
@@ -43,17 +52,17 @@ enum Theme {
         endPoint: .bottomTrailing
     )
 
-    static let cornerRadius: CGFloat = 18
+    static let cornerRadius: CGFloat = 20
     static let spacing: CGFloat = 16
     static let compactSpacing: CGFloat = 8
 
-    static let largeTitleFont: Font = scaledAvenir("AvenirNext-Heavy", size: 34, textStyle: .largeTitle)
-    static let titleFont: Font = scaledAvenir("AvenirNext-DemiBold", size: 26, textStyle: .title1)
-    static let subtitleFont: Font = scaledAvenir("AvenirNext-DemiBold", size: 17, textStyle: .headline)
+    static let largeTitleFont: Font = scaledAvenir("AvenirNext-Bold", size: 34, textStyle: .largeTitle)
+    static let titleFont: Font = scaledAvenir("AvenirNext-DemiBold", size: 27, textStyle: .title1)
+    static let subtitleFont: Font = scaledAvenir("AvenirNext-DemiBold", size: 18, textStyle: .headline)
     static let bodyFont: Font = scaledAvenir("AvenirNext-Regular", size: 16, textStyle: .body)
-    static let captionFont: Font = scaledAvenir("AvenirNext-Medium", size: 12, textStyle: .caption1)
-    static let amountFont: Font = scaledAvenir("AvenirNext-Bold", size: 22, textStyle: .title2)
-    static let heroAmountFont: Font = scaledAvenir("AvenirNext-Bold", size: 30, textStyle: .largeTitle)
+    static let captionFont: Font = scaledAvenir("AvenirNext-Medium", size: 13, textStyle: .caption1)
+    static let amountFont: Font = scaledAvenir("AvenirNext-Bold", size: 24, textStyle: .title2)
+    static let heroAmountFont: Font = scaledAvenir("AvenirNext-Bold", size: 32, textStyle: .largeTitle)
 
     private static func scaledAvenir(_ name: String, size: CGFloat, textStyle: UIFont.TextStyle) -> Font {
         let base = UIFont(name: name, size: size) ?? UIFont.systemFont(ofSize: size)
@@ -86,6 +95,12 @@ struct AppBackgroundView: View {
                 .frame(width: 260, height: 260)
                 .blur(radius: 75)
                 .offset(x: 160, y: -200)
+
+            RoundedRectangle(cornerRadius: 120, style: .continuous)
+                .fill(Theme.accent.opacity(colorScheme == .dark ? 0.18 : 0.14))
+                .frame(width: 320, height: 180)
+                .blur(radius: 80)
+                .offset(x: 130, y: 360)
         }
         .ignoresSafeArea()
     }

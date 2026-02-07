@@ -23,9 +23,9 @@ struct SummaryCardView: View {
                     .foregroundStyle(Theme.textSecondary)
                 Spacer()
                 Image(systemName: iconName)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(isHero ? Theme.accent : color)
-                    .padding(6)
+                    .padding(7)
                     .background((isHero ? Theme.accentSoft : color.opacity(0.14)))
                     .clipShape(Circle())
             }
@@ -39,8 +39,13 @@ struct SummaryCardView: View {
                 .allowsTightening(true)
                 .layoutPriority(1)
                 .animation(.easeInOut(duration: 0.2), value: amount)
+
+            Text(isHero ? "Available total funds" : metricDescription)
+                .font(Theme.captionFont)
+                .foregroundStyle(Theme.textSecondary)
+                .lineLimit(1)
         }
-        .cardStyle(background: isHero ? heroBackground : AnyShapeStyle(Theme.cardBackground))
+        .cardStyle(background: isHero ? heroBackground : AnyShapeStyle(Theme.softCardGradient))
     }
 
     private var heroBackground: AnyShapeStyle {
@@ -63,6 +68,17 @@ struct SummaryCardView: View {
             return "wallet.pass.fill"
         default:
             return "chart.line.uptrend.xyaxis"
+        }
+    }
+
+    private var metricDescription: String {
+        switch title.lowercased() {
+        case "income":
+            return "Cash in"
+        case "expenses":
+            return "Cash out"
+        default:
+            return "Net movement"
         }
     }
 }

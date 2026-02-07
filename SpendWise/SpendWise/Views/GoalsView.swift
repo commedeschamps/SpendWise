@@ -10,16 +10,31 @@ struct GoalsView: View {
         List {
             Section {
                 summaryCard
+                    .padding(.top, Theme.compactSpacing)
                     .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 0, leading: Theme.spacing, bottom: 0, trailing: Theme.spacing))
             }
 
             if viewModel.sortedGoals.isEmpty {
                 Section {
-                    Text("No goals yet. Add your first target.")
-                        .font(Theme.bodyFont)
-                        .foregroundStyle(Theme.textSecondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, Theme.compactSpacing)
+                    VStack(spacing: Theme.compactSpacing) {
+                        Image(systemName: "target")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(Theme.textSecondary)
+                        Text("No goals yet")
+                            .font(Theme.subtitleFont)
+                            .foregroundStyle(Theme.textPrimary)
+                        Text("Add your first target to start tracking progress.")
+                            .font(Theme.bodyFont)
+                            .foregroundStyle(Theme.textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Theme.spacing)
+                    .cardStyle(background: Theme.softCardGradient)
+                    .padding(.horizontal, Theme.spacing)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 }
             } else {
                 Section(header: Text("Goals")) {
@@ -28,7 +43,16 @@ struct GoalsView: View {
                             GoalDetailView(goalId: goal.id, viewModel: viewModel)
                         } label: {
                             GoalRowView(goal: goal, projection: viewModel.projection(for: goal), currencyCode: currencyCode)
+                                .padding(.horizontal, 10)
+                                .background(Theme.softCardGradient, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .stroke(Theme.separator.opacity(0.2), lineWidth: 1)
+                                )
                         }
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 6, leading: Theme.spacing, bottom: 6, trailing: Theme.spacing))
+                        .listRowSeparator(.hidden)
                     }
                     .onDelete(perform: deleteGoals)
                 }
@@ -116,6 +140,10 @@ private struct GoalRowView: View {
                 Text("\(Int(goal.progress * 100))%")
                     .font(Theme.captionFont.weight(.semibold))
                     .foregroundStyle(goal.isCompleted ? Theme.income : Theme.accent)
+                    .padding(.vertical, 3)
+                    .padding(.horizontal, 7)
+                    .background((goal.isCompleted ? Theme.income : Theme.accent).opacity(0.14))
+                    .clipShape(Capsule())
             }
 
             ProgressBarView(progress: goal.progress)
@@ -137,7 +165,7 @@ private struct GoalRowView: View {
                 .font(Theme.captionFont)
                 .foregroundStyle(projection.isAtRisk ? Theme.expense : Theme.income)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
     }
 
     private func shortDate(_ date: Date) -> String {

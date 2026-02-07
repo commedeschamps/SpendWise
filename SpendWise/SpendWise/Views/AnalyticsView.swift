@@ -9,7 +9,7 @@ struct AnalyticsView: View {
     @State private var period: AnalyticsPeriod = .month
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: Theme.spacing) {
                 header
                 kpiRibbon
@@ -29,9 +29,12 @@ struct AnalyticsView: View {
     }
 
     private var kpiRibbon: some View {
-        HStack(spacing: Theme.compactSpacing) {
-            ribbonItem(title: "Transactions", value: "\(transactionsInPeriod.count)", color: Theme.accent)
-            ribbonItem(title: "Avg Expense", value: Currency.format(averageExpense, code: currencyCode), color: Theme.expense)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Theme.compactSpacing) {
+                ribbonItem(title: "Transactions", value: "\(transactionsInPeriod.count)", color: Theme.accent)
+                ribbonItem(title: "Avg Expense", value: Currency.format(averageExpense, code: currencyCode), color: Theme.expense)
+                ribbonItem(title: "Net", value: Currency.format(balanceForPeriod, code: currencyCode), color: balanceForPeriod >= 0 ? Theme.income : Theme.expense)
+            }
         }
     }
 
@@ -46,10 +49,10 @@ struct AnalyticsView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(minWidth: 125, alignment: .leading)
         .padding(.vertical, 8)
         .padding(.horizontal, 10)
-        .background(Theme.elevatedBackground.opacity(0.78))
+        .background(Theme.softCardGradient)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -58,35 +61,31 @@ struct AnalyticsView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Theme.compactSpacing) {
             Text("Analytics")
                 .font(Theme.largeTitleFont)
                 .foregroundStyle(Theme.textPrimary)
 
-            HStack(spacing: 12) {
-                Text(period.title)
-                    .font(Theme.captionFont.weight(.semibold))
-                    .foregroundStyle(Theme.textPrimary)
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background(Theme.elevatedBackground.opacity(0.8))
-                    .clipShape(Capsule())
-                    .overlay(
-                        Capsule()
-                            .stroke(Theme.separator.opacity(0.22), lineWidth: 1)
-                    )
+            Text("Understand trends and keep spending aligned with your goals.")
+                .font(Theme.bodyFont)
+                .foregroundStyle(Theme.textSecondary)
 
-                Spacer()
-
-                Picker("Period", selection: $period) {
-                    ForEach(AnalyticsPeriod.allCases) { item in
-                        Text(item.title).tag(item)
-                    }
+            Picker("Period", selection: $period) {
+                ForEach(AnalyticsPeriod.allCases) { item in
+                    Text(item.title).tag(item)
                 }
-                .pickerStyle(.segmented)
-                .frame(maxWidth: 240)
             }
+            .pickerStyle(.segmented)
+
+            Text("\(period.title) snapshot")
+                .font(Theme.captionFont.weight(.semibold))
+                .foregroundStyle(Theme.textSecondary)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .background(Theme.elevatedBackground.opacity(0.75))
+                .clipShape(Capsule())
         }
+        .cardStyle(background: Theme.heroGradient)
     }
 
     private var summaryCard: some View {
@@ -101,7 +100,7 @@ struct AnalyticsView: View {
                 summaryMetric(title: "Balance", value: balanceForPeriod, color: Theme.accent)
             }
         }
-        .cardStyle(background: Theme.heroGradient)
+        .cardStyle(background: Theme.softCardGradient)
     }
 
     private func summaryMetric(title: String, value: Double, color: Color) -> some View {
@@ -143,7 +142,7 @@ struct AnalyticsView: View {
                 }
             }
         }
-        .cardStyle()
+        .cardStyle(background: Theme.softCardGradient)
     }
 
     private var recentActivityCard: some View {
@@ -171,6 +170,7 @@ struct AnalyticsView: View {
                         Text(formattedSignedAmount(transaction))
                             .font(Theme.bodyFont.weight(.semibold))
                             .foregroundStyle(transaction.type == .income ? Theme.income : Theme.expense)
+                            .lineLimit(1)
                     }
                     if transaction.id != recentTransactions.last?.id {
                         Divider()
@@ -178,7 +178,7 @@ struct AnalyticsView: View {
                 }
             }
         }
-        .cardStyle()
+        .cardStyle(background: Theme.softCardGradient)
     }
 
     private var transactionsInPeriod: [Transaction] {

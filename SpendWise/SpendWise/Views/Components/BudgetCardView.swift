@@ -7,14 +7,14 @@ struct BudgetCardView: View {
     let currencyCode: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Theme.compactSpacing + 4) {
             HStack(spacing: 10) {
                 ZStack {
                     Circle()
                         .fill(statusColor.opacity(0.16))
-                        .frame(width: 30, height: 30)
+                        .frame(width: 34, height: 34)
                     Image(systemName: statusIcon)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(statusColor)
                 }
 
@@ -30,7 +30,7 @@ struct BudgetCardView: View {
                 Spacer()
 
                 Text("\(Int(progress * 100))%")
-                    .font(Theme.subtitleFont)
+                    .font(Theme.amountFont)
                     .foregroundStyle(progress >= 1 ? Theme.expense : Theme.textPrimary)
                     .monospacedDigit()
             }
@@ -68,7 +68,7 @@ struct BudgetCardView: View {
                     .foregroundStyle(Theme.textSecondary)
             }
         }
-        .cardStyle()
+        .cardStyle(background: Theme.softCardGradient)
     }
 
     private func formatted(_ value: Double) -> String {

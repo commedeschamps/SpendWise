@@ -10,8 +10,8 @@ struct TransactionListView: View {
 
     var body: some View {
         VStack(spacing: Theme.compactSpacing) {
+            topSummary
             filterBar
-            overviewBar
 
             if showSyncBanner, let lastSync = viewModel.lastSync {
                 syncBanner(date: lastSync)
@@ -38,10 +38,8 @@ struct TransactionListView: View {
                     upcomingThisCycle.isEmpty &&
                     futureTransactions.isEmpty &&
                     olderTransactions.isEmpty {
-                    Text("No transactions yet.")
-                        .font(Theme.bodyFont)
-                        .foregroundStyle(Theme.textSecondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
+                    emptyState
+                        .listRowInsets(EdgeInsets(top: 12, leading: 0, bottom: 0, trailing: 0))
                         .listRowBackground(Color.clear)
                 } else {
                     section(title: "Overdue", items: overdueTransactions)
@@ -53,6 +51,7 @@ struct TransactionListView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.clear)
+            .animation(.easeInOut(duration: 0.22), value: displayTransactions.count)
         }
         .background {
             AppBackgroundView()
@@ -90,6 +89,27 @@ struct TransactionListView: View {
                 }
             }
         }
+    }
+
+    private var topSummary: some View {
+        VStack(alignment: .leading, spacing: Theme.compactSpacing) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Transaction Hub")
+                    .font(Theme.titleFont)
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer()
+                Text(dateScope.title)
+                    .font(Theme.captionFont.weight(.semibold))
+                    .foregroundStyle(Theme.textSecondary)
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background(Theme.elevatedBackground.opacity(0.75))
+                    .clipShape(Capsule())
+            }
+            overviewBar
+        }
+        .padding(.horizontal, Theme.spacing)
+        .padding(.top, Theme.compactSpacing)
     }
 
     private var filterBar: some View {
@@ -156,12 +176,13 @@ struct TransactionListView: View {
     }
 
     private var overviewBar: some View {
-        HStack(spacing: Theme.compactSpacing) {
-            overviewChip(title: "Items", value: "\(displayTransactions.count)", color: Theme.accent)
-            overviewChip(title: "Income", value: currencyAmount(filteredIncome), color: Theme.income)
-            overviewChip(title: "Expense", value: currencyAmount(filteredExpense), color: Theme.expense)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Theme.compactSpacing) {
+                overviewChip(title: "Items", value: "\(displayTransactions.count)", color: Theme.accent)
+                overviewChip(title: "Income", value: currencyAmount(filteredIncome), color: Theme.income)
+                overviewChip(title: "Expense", value: currencyAmount(filteredExpense), color: Theme.expense)
+            }
         }
-        .padding(.horizontal, Theme.spacing)
     }
 
     private func overviewChip(title: String, value: String, color: Color) -> some View {
@@ -175,10 +196,10 @@ struct TransactionListView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(minWidth: 110, alignment: .leading)
         .padding(.vertical, 7)
         .padding(.horizontal, 10)
-        .background(Theme.elevatedBackground.opacity(0.72))
+        .background(Theme.softCardGradient)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -189,7 +210,11 @@ struct TransactionListView: View {
     private func section(title: String, items: [Transaction]) -> some View {
         guard !items.isEmpty else { return AnyView(EmptyView()) }
         return AnyView(
-            Section(header: Text(title.uppercased()).font(Theme.captionFont).foregroundStyle(Theme.textSecondary)) {
+            Section(
+                header: Text(title.uppercased())
+                    .font(Theme.captionFont.weight(.semibold))
+                    .foregroundStyle(Theme.textSecondary)
+            ) {
                 ForEach(items) { transaction in
                     row(for: transaction)
                 }
@@ -205,8 +230,16 @@ struct TransactionListView: View {
             TransactionDetailView(transaction: transaction, viewModel: viewModel)
         } label: {
             TransactionRowView(transaction: transaction)
+                .padding(.horizontal, 10)
+                .background(Theme.softCardGradient, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Theme.separator.opacity(0.2), lineWidth: 1)
+                )
         }
-        .listRowBackground(Theme.cardBackground)
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+        .listRowInsets(EdgeInsets(top: 6, leading: Theme.spacing, bottom: 6, trailing: Theme.spacing))
         .swipeActions(edge: .leading, allowsFullSwipe: false) {
             Button {
                 viewModel.toggleRecurring(for: transaction)
@@ -319,6 +352,24 @@ struct TransactionListView: View {
             Capsule()
                 .stroke(Theme.separator.opacity(0.24), lineWidth: 1)
         )
+        .padding(.horizontal, Theme.spacing)
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: Theme.compactSpacing) {
+            Image(systemName: "tray")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(Theme.textSecondary)
+            Text("No transactions yet")
+                .font(Theme.subtitleFont)
+                .foregroundStyle(Theme.textPrimary)
+            Text("Tap + to add your first transaction.")
+                .font(Theme.bodyFont)
+                .foregroundStyle(Theme.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
+        .cardStyle(background: Theme.softCardGradient)
         .padding(.horizontal, Theme.spacing)
     }
 

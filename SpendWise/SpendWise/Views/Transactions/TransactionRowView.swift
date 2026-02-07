@@ -6,15 +6,22 @@ struct TransactionRowView: View {
     @AppStorage("currencyCode") private var currencyCode = "KZT"
 
     var body: some View {
-        HStack(alignment: .center, spacing: Theme.spacing) {
+        HStack(alignment: .center, spacing: 12) {
             iconBadge
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(transaction.title)
-                    .font(Theme.subtitleFont)
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.9)
+            VStack(alignment: .leading, spacing: Theme.compactSpacing) {
+                HStack(spacing: 6) {
+                    Text(transaction.title)
+                        .font(Theme.subtitleFont)
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                    if transaction.isRecurring {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Theme.accentAlt)
+                    }
+                }
 
                 HStack(spacing: 6) {
                     categoryBadge
@@ -22,7 +29,7 @@ struct TransactionRowView: View {
                         .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.85)
+                        .minimumScaleFactor(0.9)
                 }
             }
             .layoutPriority(1)
@@ -31,11 +38,11 @@ struct TransactionRowView: View {
 
             VStack(alignment: .trailing, spacing: 4) {
                 Text(amountString)
-                    .font(Theme.bodyFont.weight(.semibold))
+                    .font(Theme.subtitleFont.weight(.bold))
                     .foregroundStyle(transaction.type == .income ? Theme.income : Theme.expense)
                     .monospacedDigit()
                     .lineLimit(1)
-                    .minimumScaleFactor(0.55)
+                    .minimumScaleFactor(0.62)
                     .allowsTightening(true)
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
@@ -44,25 +51,24 @@ struct TransactionRowView: View {
                             .opacity(0.9)
                     )
                     .clipShape(Capsule())
-                if transaction.isRecurring {
-                    Text("Recurring")
-                        .font(Theme.captionFont)
-                        .foregroundStyle(Theme.textSecondary)
-                        .lineLimit(1)
-                }
+                Text(transaction.type == .income ? "Income" : "Expense")
+                    .font(Theme.captionFont)
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
             }
-            .frame(minWidth: 110, maxWidth: 150, alignment: .trailing)
+            .frame(minWidth: 124, maxWidth: 168, alignment: .trailing)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
     }
 
     private var iconBadge: some View {
         ZStack {
             Circle()
                 .fill(badgeBackground)
-                .frame(width: 36, height: 36)
+                .frame(width: 40, height: 40)
             Image(systemName: iconName)
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(badgeForeground)
         }
         .accessibilityHidden(true)
@@ -82,6 +88,7 @@ struct TransactionRowView: View {
                 Capsule()
                     .stroke(Theme.separator.opacity(0.22), lineWidth: 1)
             )
+            .fixedSize(horizontal: true, vertical: false)
     }
 
     private var amountString: String {
@@ -91,7 +98,7 @@ struct TransactionRowView: View {
 
     private var dateString: String {
         let formatter = DateFormatter()
-        formatter.setLocalizedDateFormatFromTemplate("d MMM")
+        formatter.setLocalizedDateFormatFromTemplate("d MMM yyyy")
         return formatter.string(from: transaction.date)
     }
 

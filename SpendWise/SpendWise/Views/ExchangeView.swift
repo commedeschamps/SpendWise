@@ -6,6 +6,19 @@ struct ExchangeView: View {
 
     var body: some View {
         Form {
+            Section {
+                VStack(alignment: .leading, spacing: Theme.compactSpacing) {
+                    Text("Currency Exchange")
+                        .font(Theme.titleFont)
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("Convert your amounts using live market rates.")
+                        .font(Theme.bodyFont)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                .padding(.vertical, 4)
+            }
+            .listRowBackground(Color.clear)
+
             Section(
                 header: Text("Converter"),
                 footer: Text("Live exchange rates from ExchangeRate-API.")
@@ -32,6 +45,8 @@ struct ExchangeView: View {
                 } label: {
                     Label("Swap Currencies", systemImage: "arrow.up.arrow.down.circle")
                 }
+                .buttonStyle(.bordered)
+                .tint(Theme.accentAlt)
 
                 Button {
                     viewModel.convert()
@@ -52,10 +67,11 @@ struct ExchangeView: View {
                 if viewModel.conversionResult != nil {
                     VStack(alignment: .leading, spacing: Theme.compactSpacing) {
                         Text("\(viewModel.formattedInput) = \(viewModel.formattedOutput)")
-                            .font(Theme.subtitleFont)
+                        .font(Theme.subtitleFont)
                             .foregroundStyle(Theme.textPrimary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
+                            .monospacedDigit()
                         Text(viewModel.rateLine)
                             .font(Theme.captionFont)
                             .foregroundStyle(Theme.textSecondary)
@@ -65,6 +81,7 @@ struct ExchangeView: View {
                                 .foregroundStyle(Theme.textSecondary)
                         }
                     }
+                    .padding(.vertical, 4)
                 }
 
                 if case .error(let message) = viewModel.state {

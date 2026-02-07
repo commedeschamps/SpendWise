@@ -20,16 +20,17 @@ struct SettingsView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Preferences")
-                                .font(Theme.subtitleFont)
+                            Text("Workspace Settings")
+                                .font(Theme.titleFont)
                                 .foregroundStyle(Theme.textPrimary)
-                            Text("Personalize your finance workspace.")
-                                .font(Theme.captionFont)
+                            Text("Personalize currency, budget cycle and category limits.")
+                                .font(Theme.bodyFont)
                                 .foregroundStyle(Theme.textSecondary)
                         }
                     }
                     .padding(.vertical, 4)
                 }
+                .listRowBackground(Color.clear)
 
                 Section(
                     header: Text("Preferences"),
@@ -47,8 +48,13 @@ struct SettingsView: View {
                         Text("Monthly Start Day: \(monthStartDay)")
                     }
 
-                    TextField("Monthly Budget", value: $monthlyBudget, format: .number)
-                        .keyboardType(.decimalPad)
+                    HStack {
+                        TextField("Monthly Budget", value: $monthlyBudget, format: .number)
+                            .keyboardType(.decimalPad)
+                        Text(currencyCode)
+                            .font(Theme.captionFont)
+                            .foregroundStyle(Theme.textSecondary)
+                    }
                 }
 
                 Section(
@@ -66,7 +72,7 @@ struct SettingsView: View {
                                 .keyboardType(.decimalPad)
                                 .multilineTextAlignment(.trailing)
                                 .frame(width: 110)
-                            Text(Currency.symbol(for: currencyCode))
+                            Text(currencyCode)
                                 .font(Theme.captionFont)
                                 .foregroundStyle(Theme.textSecondary)
                         }

@@ -30,14 +30,14 @@ struct TipsCardView: View {
                     Label("Refresh", systemImage: "arrow.clockwise")
                         .font(Theme.captionFont)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Theme.accent)
+                .buttonStyle(.bordered)
+                .tint(Theme.accentAlt)
                 .controlSize(.small)
             }
 
             content
         }
-        .cardStyle(background: Theme.elevatedBackground.opacity(0.82))
+        .cardStyle(background: Theme.softCardGradient)
     }
 
     @ViewBuilder
@@ -67,6 +67,7 @@ struct TipsCardView: View {
                                 .foregroundStyle(Theme.textPrimary)
                                 .lineLimit(2)
                                 .minimumScaleFactor(0.9)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                     Text(tip.author)

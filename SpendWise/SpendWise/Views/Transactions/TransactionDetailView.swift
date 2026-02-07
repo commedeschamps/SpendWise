@@ -8,7 +8,7 @@ struct TransactionDetailView: View {
     @State private var showingEditForm = false
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: Theme.spacing) {
                 amountHero
                 detailCard
@@ -70,6 +70,13 @@ struct TransactionDetailView: View {
             Text(currentTransaction.title)
                 .font(Theme.subtitleFont)
                 .foregroundStyle(Theme.textPrimary)
+
+            if !currentTransaction.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Text(currentTransaction.note)
+                    .font(Theme.bodyFont)
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(2)
+            }
         }
         .cardStyle(background: Theme.heroGradient)
     }
@@ -103,7 +110,7 @@ struct TransactionDetailView: View {
                     .foregroundStyle(Theme.textSecondary)
             }
         }
-        .cardStyle()
+        .cardStyle(background: Theme.softCardGradient)
     }
 
     private func detailRow(label: String, value: String, isAccent: Bool = false) -> some View {

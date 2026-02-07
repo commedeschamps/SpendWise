@@ -46,8 +46,9 @@ struct RootTabView: View {
                 }
         }
         .tint(Theme.accent)
-        .toolbarBackground(Theme.elevatedBackground, for: .tabBar)
+        .toolbarBackground(Theme.elevatedBackground.opacity(0.96), for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
+        .toolbarColorScheme(nil, for: .tabBar)
         .onAppear {
             transactionsViewModel.startListening()
             tipsViewModel.fetchTip()
