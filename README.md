@@ -6,7 +6,7 @@ Personal Finance and Budget Tracker built with SwiftUI + MVVM. The app supports 
 
 - Transactions CRUD (create, edit, delete) with real-time updates
 - Firebase Realtime Database sync
-- Exchange rates card (REST API via URLSession + async/await)
+- Exchange rates card (REST API via Alamofire + async/await)
 - Analytics tab (summary, category breakdown, recent activity)
 - Category budgets (per-category limits stored in UserDefaults)
 - Settings with currency selection and monthly start day
@@ -17,7 +17,7 @@ Personal Finance and Budget Tracker built with SwiftUI + MVVM. The app supports 
 - SwiftUI
 - MVVM
 - Firebase Realtime Database
-- URLSession (async/await)
+- Alamofire (async/await)
 - UserDefaults
 
 ## Requirements Coverage (high-level)
@@ -62,4 +62,3 @@ SpendWise/
 - Currency is stored by code (default: KZT). You can change it in Settings.
 - Category budgets are stored locally in UserDefaults.
 - Exchange rates are fetched from `https://open.er-api.com/v6/latest/USD`.
-

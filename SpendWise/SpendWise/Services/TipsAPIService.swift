@@ -1,15 +1,14 @@
 import Foundation
+import Alamofire
 
 struct TipsAPIService {
     private let endpoint = URL(string: "https://open.er-api.com/v6/latest/USD")!
 
     func fetchTip() async throws -> Tip {
-        let (data, response) = try await URLSession.shared.data(from: endpoint)
-        if let httpResponse = response as? HTTPURLResponse,
-           !(200...299).contains(httpResponse.statusCode) {
-            throw URLError(.badServerResponse)
-        }
-
+        let data = try await AF.request(endpoint)
+            .validate(statusCode: 200..<300)
+            .serializingData()
+            .value
         let payload = try JSONDecoder().decode(ExchangeRatesResponse.self, from: data)
 
         guard let kzt = payload.rates["KZT"],
