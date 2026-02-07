@@ -8,6 +8,29 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    HStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(Theme.accentSoft)
+                                .frame(width: 34, height: 34)
+                            Image(systemName: "slider.horizontal.3")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Theme.accent)
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Preferences")
+                                .font(Theme.subtitleFont)
+                                .foregroundStyle(Theme.textPrimary)
+                            Text("Personalize your finance workspace.")
+                                .font(Theme.captionFont)
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+
                 Section(
                     header: Text("Preferences"),
                     footer: Text("These settings are stored locally on this device.")
@@ -58,7 +81,13 @@ struct SettingsView: View {
                     EmptyView()
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.clear)
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .background {
+            AppBackgroundView()
         }
         .onAppear(perform: migrateLegacyCurrency)
     }

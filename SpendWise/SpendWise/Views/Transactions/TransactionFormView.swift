@@ -4,6 +4,7 @@ struct TransactionFormView: View {
     @Binding var isPresented: Bool
     let existing: Transaction?
     let onSave: (Transaction) -> Void
+    @AppStorage("currencyCode") private var currencyCode = "KZT"
 
     @State private var title: String
     @State private var amountText: String
@@ -30,6 +31,29 @@ struct TransactionFormView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "New Transaction" : title)
+                                .font(Theme.subtitleFont)
+                                .foregroundStyle(Theme.textPrimary)
+                                .lineLimit(1)
+                            Text(category.title)
+                                .font(Theme.captionFont)
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+
+                        Spacer()
+
+                        Text(previewAmount)
+                            .font(Theme.amountFont)
+                            .foregroundStyle(type == .income ? Theme.income : Theme.expense)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                    .padding(.vertical, 4)
+                }
+
                 Section(
                     header: Text("Details"),
                     footer: Text("Title and amount are required.")
@@ -47,6 +71,7 @@ struct TransactionFormView: View {
                             Text(item.title).tag(item)
                         }
                     }
+                    .pickerStyle(.segmented)
 
                     Picker("Category", selection: $category) {
                         ForEach(Category.allCases) { item in
@@ -76,10 +101,14 @@ struct TransactionFormView: View {
                     Button("Save") {
                         save()
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
+                    .buttonStyle(PrimaryActionButtonStyle())
                 }
             }
             .navigationTitle(existing == nil ? "New Transaction" : "Edit Transaction")
+            .scrollContentBackground(.hidden)
+            .background {
+                AppBackgroundView()
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -121,6 +150,12 @@ struct TransactionFormView: View {
 
         onSave(transaction)
         isPresented = false
+    }
+
+    private var previewAmount: String {
+        let normalized = Double(amountText.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let sign = type == .expense ? "-" : "+"
+        return "\(sign)\(Currency.format(abs(normalized), code: currencyCode))"
     }
 }
 

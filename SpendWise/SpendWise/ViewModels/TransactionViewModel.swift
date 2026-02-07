@@ -23,8 +23,7 @@ final class TransactionViewModel: ObservableObject {
         isListening = true
         uiState = .loading
         repository.listenTransactions { [weak self] result in
-            guard let self else { return }
-            Task { @MainActor [weak self] in
+            Task { @MainActor in
                 guard let self else { return }
                 switch result {
                 case .success(let items):
@@ -34,6 +33,7 @@ final class TransactionViewModel: ObservableObject {
                     self.lastSync = Date()
                     self.uiState = .success
                 case .failure(let error):
+                    self.isListening = false
                     self.uiState = .error(error.localizedDescription)
                 }
             }
@@ -42,27 +42,13 @@ final class TransactionViewModel: ObservableObject {
 
     func addTransaction(_ transaction: Transaction) {
         uiState = .loading
-        let previous = transactions
-        var updated = transactions
-        if let index = updated.firstIndex(where: { $0.id == transaction.id }) {
-            updated[index] = transaction
-        } else {
-            updated.append(transaction)
-        }
-        withAnimation(.spring()) {
-            transactions = updated
-        }
         repository.addTransaction(transaction) { [weak self] result in
-            guard let self else { return }
-            Task { @MainActor [weak self] in
+            Task { @MainActor in
                 guard let self else { return }
                 switch result {
                 case .success:
                     self.uiState = .success
                 case .failure(let error):
-                    withAnimation(.spring()) {
-                        self.transactions = previous
-                    }
                     self.uiState = .error(error.localizedDescription)
                 }
             }
@@ -71,27 +57,13 @@ final class TransactionViewModel: ObservableObject {
 
     func updateTransaction(_ transaction: Transaction) {
         uiState = .loading
-        let previous = transactions
-        var updated = transactions
-        if let index = updated.firstIndex(where: { $0.id == transaction.id }) {
-            updated[index] = transaction
-        } else {
-            updated.append(transaction)
-        }
-        withAnimation(.spring()) {
-            transactions = updated
-        }
         repository.updateTransaction(transaction) { [weak self] result in
-            guard let self else { return }
-            Task { @MainActor [weak self] in
+            Task { @MainActor in
                 guard let self else { return }
                 switch result {
                 case .success:
                     self.uiState = .success
                 case .failure(let error):
-                    withAnimation(.spring()) {
-                        self.transactions = previous
-                    }
                     self.uiState = .error(error.localizedDescription)
                 }
             }
@@ -100,27 +72,32 @@ final class TransactionViewModel: ObservableObject {
 
     func deleteTransaction(id: String) {
         uiState = .loading
-        let previous = transactions
-        var updated = transactions
-        updated.removeAll { $0.id == id }
-        withAnimation(.spring()) {
-            transactions = updated
-        }
         repository.deleteTransaction(id: id) { [weak self] result in
-            guard let self else { return }
-            Task { @MainActor [weak self] in
+            Task { @MainActor in
                 guard let self else { return }
                 switch result {
                 case .success:
                     self.uiState = .success
                 case .failure(let error):
-                    withAnimation(.spring()) {
-                        self.transactions = previous
-                    }
                     self.uiState = .error(error.localizedDescription)
                 }
             }
         }
+    }
+
+    func duplicateTransaction(_ transaction: Transaction) {
+        let duplicate = Transaction(
+            id: UUID().uuidString,
+            title: transaction.title,
+            amount: transaction.amount,
+            date: transaction.date,
+            type: transaction.type,
+            category: transaction.category,
+            note: transaction.note,
+            isRecurring: transaction.isRecurring,
+            createdAt: Date()
+        )
+        addTransaction(duplicate)
     }
 
     func toggleRecurring(for transaction: Transaction) {
@@ -169,7 +146,7 @@ final class TransactionViewModel: ObservableObject {
     }
 
     var incomeThisMonth: Double {
-        let range = currentCycleRange()
+        let range = currentCycleRange
         return transactions
             .filter { $0.type == .income && $0.date >= range.start && $0.date < range.end }
             .map { $0.amount }
@@ -177,14 +154,14 @@ final class TransactionViewModel: ObservableObject {
     }
 
     var expenseThisMonth: Double {
-        let range = currentCycleRange()
+        let range = currentCycleRange
         return transactions
             .filter { $0.type == .expense && $0.date >= range.start && $0.date < range.end }
             .map { $0.amount }
             .reduce(0, +)
     }
 
-    private func currentCycleRange() -> (start: Date, end: Date) {
+    var currentCycleRange: (start: Date, end: Date) {
         let calendar = Calendar.current
         let startDay = max(1, min(28, UserDefaults.standard.integer(forKey: "monthStartDay").nonZeroOrDefault(1)))
         let today = Date()

@@ -12,6 +12,7 @@ struct AnalyticsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.spacing) {
                 header
+                kpiRibbon
 
                 summaryCard
 
@@ -22,19 +23,58 @@ struct AnalyticsView: View {
             .padding(.horizontal, Theme.spacing)
             .padding(.vertical, Theme.spacing)
         }
-        .background(Theme.background)
+        .background {
+            AppBackgroundView()
+        }
+    }
+
+    private var kpiRibbon: some View {
+        HStack(spacing: Theme.compactSpacing) {
+            ribbonItem(title: "Transactions", value: "\(transactionsInPeriod.count)", color: Theme.accent)
+            ribbonItem(title: "Avg Expense", value: Currency.format(averageExpense, code: currencyCode), color: Theme.expense)
+        }
+    }
+
+    private func ribbonItem(title: String, value: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(Theme.captionFont)
+                .foregroundStyle(Theme.textSecondary)
+            Text(value)
+                .font(Theme.captionFont)
+                .foregroundStyle(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .background(Theme.elevatedBackground.opacity(0.78))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(color.opacity(0.2), lineWidth: 1)
+        )
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Analytics")
                 .font(Theme.largeTitleFont)
                 .foregroundStyle(Theme.textPrimary)
 
             HStack(spacing: 12) {
                 Text(period.title)
-                    .font(Theme.captionFont)
-                    .foregroundStyle(Theme.textSecondary)
+                    .font(Theme.captionFont.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(Theme.elevatedBackground.opacity(0.8))
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule()
+                            .stroke(Theme.separator.opacity(0.22), lineWidth: 1)
+                    )
 
                 Spacer()
 
@@ -61,7 +101,7 @@ struct AnalyticsView: View {
                 summaryMetric(title: "Balance", value: balanceForPeriod, color: Theme.accent)
             }
         }
-        .cardStyle()
+        .cardStyle(background: Theme.heroGradient)
     }
 
     private func summaryMetric(title: String, value: Double, color: Color) -> some View {
@@ -158,6 +198,13 @@ struct AnalyticsView: View {
             .filter { $0.type == .expense }
             .map { $0.amount }
             .reduce(0, +)
+    }
+
+    private var averageExpense: Double {
+        let expenses = transactionsInPeriod.filter { $0.type == .expense }
+        guard !expenses.isEmpty else { return 0 }
+        let total = expenses.map { $0.amount }.reduce(0, +)
+        return total / Double(expenses.count)
     }
 
     private var balanceForPeriod: Double {

@@ -2,12 +2,16 @@ import SwiftUI
 
 struct TransactionListView: View {
     @ObservedObject var viewModel: TransactionViewModel
+    @AppStorage("currencyCode") private var currencyCode = "KZT"
     @State private var showingAddForm = false
     @State private var showSyncBanner = false
+    @State private var searchText = ""
+    @State private var dateScope: TransactionDateScope = .all
 
     var body: some View {
         VStack(spacing: Theme.compactSpacing) {
             filterBar
+            overviewBar
 
             if showSyncBanner, let lastSync = viewModel.lastSync {
                 syncBanner(date: lastSync)
@@ -30,7 +34,10 @@ struct TransactionListView: View {
                     }
                 }
 
-                if overdueTransactions.isEmpty && upcomingThisMonth.isEmpty && olderTransactions.isEmpty {
+                if overdueTransactions.isEmpty &&
+                    upcomingThisCycle.isEmpty &&
+                    futureTransactions.isEmpty &&
+                    olderTransactions.isEmpty {
                     Text("No transactions yet.")
                         .font(Theme.bodyFont)
                         .foregroundStyle(Theme.textSecondary)
@@ -38,19 +45,31 @@ struct TransactionListView: View {
                         .listRowBackground(Color.clear)
                 } else {
                     section(title: "Overdue", items: overdueTransactions)
-                    section(title: "This Month", items: upcomingThisMonth)
+                    section(title: "This Cycle", items: upcomingThisCycle)
+                    section(title: "Future", items: futureTransactions)
                     section(title: "Older", items: olderTransactions)
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.clear)
+        }
+        .background {
+            AppBackgroundView()
         }
         .navigationTitle("Transactions")
+        .searchable(text: $searchText, prompt: "Search title, note, category")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingAddForm = true
                 } label: {
                     Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 30, height: 30)
+                        .background(Theme.accent, in: Circle())
+                        .shadow(color: Theme.accent.opacity(0.35), radius: 6, x: 0, y: 3)
                 }
             }
         }
@@ -106,6 +125,16 @@ struct TransactionListView: View {
                 } label: {
                     chipLabel(title: viewModel.sortMode.title, systemImage: "arrow.up.arrow.down")
                 }
+
+                Menu {
+                    Picker("Period", selection: $dateScope) {
+                        ForEach(TransactionDateScope.allCases) { scope in
+                            Text(scope.title).tag(scope)
+                        }
+                    }
+                } label: {
+                    chipLabel(title: dateScope.title, systemImage: "calendar")
+                }
             }
             .padding(.horizontal, Theme.spacing)
             .padding(.vertical, Theme.compactSpacing)
@@ -118,31 +147,88 @@ struct TransactionListView: View {
             .foregroundStyle(Theme.textPrimary)
             .padding(.vertical, 6)
             .padding(.horizontal, 10)
-            .background(Theme.cardBackground)
+            .background(Theme.elevatedBackground.opacity(0.8))
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(Theme.separator.opacity(0.18), lineWidth: 1)
+                    .stroke(Theme.accent.opacity(0.18), lineWidth: 1)
             )
+    }
+
+    private var overviewBar: some View {
+        HStack(spacing: Theme.compactSpacing) {
+            overviewChip(title: "Items", value: "\(displayTransactions.count)", color: Theme.accent)
+            overviewChip(title: "Income", value: currencyAmount(filteredIncome), color: Theme.income)
+            overviewChip(title: "Expense", value: currencyAmount(filteredExpense), color: Theme.expense)
+        }
+        .padding(.horizontal, Theme.spacing)
+    }
+
+    private func overviewChip(title: String, value: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(Theme.captionFont)
+                .foregroundStyle(Theme.textSecondary)
+            Text(value)
+                .font(Theme.captionFont.weight(.semibold))
+                .foregroundStyle(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 7)
+        .padding(.horizontal, 10)
+        .background(Theme.elevatedBackground.opacity(0.72))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(color.opacity(0.22), lineWidth: 1)
+        )
     }
 
     private func section(title: String, items: [Transaction]) -> some View {
         guard !items.isEmpty else { return AnyView(EmptyView()) }
         return AnyView(
-            Section(header: Text(title).font(Theme.captionFont).foregroundStyle(Theme.textSecondary)) {
+            Section(header: Text(title.uppercased()).font(Theme.captionFont).foregroundStyle(Theme.textSecondary)) {
                 ForEach(items) { transaction in
-                    NavigationLink {
-                        TransactionDetailView(transaction: transaction, viewModel: viewModel)
-                    } label: {
-                        TransactionRowView(transaction: transaction)
-                    }
-                    .listRowBackground(Theme.cardBackground)
+                    row(for: transaction)
                 }
                 .onDelete { offsets in
                     delete(offsets, in: items)
                 }
             }
         )
+    }
+
+    private func row(for transaction: Transaction) -> some View {
+        NavigationLink {
+            TransactionDetailView(transaction: transaction, viewModel: viewModel)
+        } label: {
+            TransactionRowView(transaction: transaction)
+        }
+        .listRowBackground(Theme.cardBackground)
+        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+            Button {
+                viewModel.toggleRecurring(for: transaction)
+            } label: {
+                Label(transaction.isRecurring ? "Unmark Recurring" : "Recurring", systemImage: "arrow.triangle.2.circlepath")
+            }
+            .tint(Theme.accentAlt)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                viewModel.deleteTransaction(id: transaction.id)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+
+            Button {
+                viewModel.duplicateTransaction(transaction)
+            } label: {
+                Label("Duplicate", systemImage: "plus.square.on.square")
+            }
+            .tint(Theme.accent)
+        }
     }
 
     private func delete(_ offsets: IndexSet, in items: [Transaction]) {
@@ -153,28 +239,67 @@ struct TransactionListView: View {
 
     private var overdueTransactions: [Transaction] {
         let calendar = Calendar.current
-        guard let monthInterval = calendar.dateInterval(of: .month, for: Date()) else { return [] }
+        let range = viewModel.currentCycleRange
+        let cycleStart = range.start
         let today = calendar.startOfDay(for: Date())
 
-        return viewModel.filteredTransactions
-            .filter { $0.date >= monthInterval.start && $0.date < today }
+        return displayTransactions
+            .filter { $0.date >= cycleStart && $0.date < today }
     }
 
-    private var upcomingThisMonth: [Transaction] {
+    private func matchesSearch(_ transaction: Transaction) -> Bool {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return true }
+        let haystack = "\(transaction.title) \(transaction.note) \(transaction.category.title)".lowercased()
+        return haystack.contains(query.lowercased())
+    }
+
+    private func matchesDateScope(_ transaction: Transaction) -> Bool {
         let calendar = Calendar.current
-        guard let monthInterval = calendar.dateInterval(of: .month, for: Date()) else { return [] }
         let today = calendar.startOfDay(for: Date())
 
-        return viewModel.filteredTransactions
-            .filter { $0.date >= today && $0.date < monthInterval.end }
+        switch dateScope {
+        case .all:
+            return true
+        case .currentCycle:
+            let range = viewModel.currentCycleRange
+            return transaction.date >= range.start && transaction.date < range.end
+        case .last7Days:
+            guard let start = calendar.date(byAdding: .day, value: -6, to: today) else { return true }
+            return transaction.date >= start && transaction.date <= Date()
+        case .last30Days:
+            guard let start = calendar.date(byAdding: .day, value: -29, to: today) else { return true }
+            return transaction.date >= start && transaction.date <= Date()
+        }
+    }
+
+    private var displayTransactions: [Transaction] {
+        viewModel.filteredTransactions
+            .filter(matchesSearch)
+            .filter(matchesDateScope)
+    }
+
+    private var upcomingThisCycle: [Transaction] {
+        let calendar = Calendar.current
+        let range = viewModel.currentCycleRange
+        let cycleEnd = range.end
+        let today = calendar.startOfDay(for: Date())
+
+        return displayTransactions
+            .filter { $0.date >= today && $0.date < cycleEnd }
+    }
+
+    private var futureTransactions: [Transaction] {
+        let cycleEnd = viewModel.currentCycleRange.end
+        return displayTransactions
+            .filter { $0.date >= cycleEnd }
     }
 
     private var olderTransactions: [Transaction] {
-        let calendar = Calendar.current
-        guard let monthInterval = calendar.dateInterval(of: .month, for: Date()) else { return [] }
+        let cycleStart = viewModel.currentCycleRange.start
 
-        return viewModel.filteredTransactions
-            .filter { $0.date < monthInterval.start }
+        return displayTransactions
+            .filter { $0.date < cycleStart }
     }
 
     private func syncBanner(date: Date) -> some View {
@@ -188,11 +313,11 @@ struct TransactionListView: View {
         }
         .padding(.horizontal, Theme.spacing)
         .padding(.vertical, Theme.compactSpacing)
-        .background(Theme.cardBackground)
+        .background(Theme.heroGradient)
         .clipShape(Capsule())
         .overlay(
             Capsule()
-                .stroke(Theme.separator.opacity(0.18), lineWidth: 1)
+                .stroke(Theme.separator.opacity(0.24), lineWidth: 1)
         )
         .padding(.horizontal, Theme.spacing)
     }
@@ -201,6 +326,42 @@ struct TransactionListView: View {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())
+    }
+
+    private var filteredIncome: Double {
+        displayTransactions
+            .filter { $0.type == .income }
+            .map { $0.amount }
+            .reduce(0, +)
+    }
+
+    private var filteredExpense: Double {
+        displayTransactions
+            .filter { $0.type == .expense }
+            .map { $0.amount }
+            .reduce(0, +)
+    }
+
+    private func currencyAmount(_ amount: Double) -> String {
+        Currency.format(amount, code: currencyCode)
+    }
+}
+
+private enum TransactionDateScope: String, CaseIterable, Identifiable {
+    case all
+    case currentCycle
+    case last7Days
+    case last30Days
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .all: return "All Time"
+        case .currentCycle: return "This Cycle"
+        case .last7Days: return "Last 7 Days"
+        case .last30Days: return "Last 30 Days"
+        }
     }
 }
 

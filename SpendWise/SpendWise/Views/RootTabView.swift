@@ -3,6 +3,7 @@ import SwiftUI
 struct RootTabView: View {
     @StateObject private var transactionsViewModel = TransactionViewModel()
     @StateObject private var tipsViewModel = TipsViewModel()
+    @StateObject private var goalsViewModel = GoalsViewModel()
 
     var body: some View {
         TabView {
@@ -25,12 +26,28 @@ struct RootTabView: View {
                 Label("Analytics", systemImage: "chart.bar.xaxis")
             }
 
+            NavigationStack {
+                GoalsView(viewModel: goalsViewModel)
+            }
+            .tabItem {
+                Label("Goals", systemImage: "target")
+            }
+
+            NavigationStack {
+                ExchangeView()
+            }
+            .tabItem {
+                Label("Exchange", systemImage: "arrow.left.arrow.right.circle")
+            }
+
             SettingsView()
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }
         }
         .tint(Theme.accent)
+        .toolbarBackground(Theme.elevatedBackground, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
         .onAppear {
             transactionsViewModel.startListening()
             tipsViewModel.fetchTip()

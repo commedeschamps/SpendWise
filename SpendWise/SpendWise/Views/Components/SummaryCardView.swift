@@ -17,9 +17,18 @@ struct SummaryCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-            Text(title)
-                .font(Theme.captionFont)
-                .foregroundStyle(Theme.textSecondary)
+            HStack {
+                Text(title)
+                    .font(Theme.captionFont)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Image(systemName: iconName)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(isHero ? Theme.accent : color)
+                    .padding(6)
+                    .background((isHero ? Theme.accentSoft : color.opacity(0.14)))
+                    .clipShape(Circle())
+            }
 
             Text(formattedAmount)
                 .font(isHero ? Theme.heroAmountFont : Theme.amountFont)
@@ -35,19 +44,26 @@ struct SummaryCardView: View {
     }
 
     private var heroBackground: AnyShapeStyle {
-        AnyShapeStyle(
-            LinearGradient(
-                colors: [Theme.accentSoft, Theme.accentSoft.opacity(0.6)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        AnyShapeStyle(Theme.heroGradient)
     }
 
     private var formattedAmount: String {
         let sign = amount < 0 ? "-" : ""
         let value = abs(amount)
         return "\(sign)\(Currency.format(value, code: currencyCode))"
+    }
+
+    private var iconName: String {
+        switch title.lowercased() {
+        case "income":
+            return "arrow.down.circle.fill"
+        case "expenses":
+            return "arrow.up.circle.fill"
+        case "balance":
+            return "wallet.pass.fill"
+        default:
+            return "chart.line.uptrend.xyaxis"
+        }
     }
 }
 

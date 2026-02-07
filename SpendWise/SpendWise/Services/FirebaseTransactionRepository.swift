@@ -36,6 +36,11 @@ final class FirebaseTransactionRepository: TransactionRepository {
     }
 
     func listenTransactions(completion: @escaping (Result<[Transaction], Error>) -> Void) {
+        if let handle {
+            transactionsRef().removeObserver(withHandle: handle)
+            self.handle = nil
+        }
+
         handle = transactionsRef().observe(
             .value,
             with: { [weak self] snapshot in
@@ -53,7 +58,8 @@ final class FirebaseTransactionRepository: TransactionRepository {
 
                 completion(.success(items))
             },
-            withCancel: { error in
+            withCancel: { [weak self] error in
+                self?.handle = nil
                 completion(.failure(error))
             }
         )

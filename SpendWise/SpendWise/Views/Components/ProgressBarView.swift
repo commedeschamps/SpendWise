@@ -12,6 +12,10 @@ struct ProgressBarView: View {
                 Capsule()
                     .fill(barGradient)
                     .frame(width: width * CGFloat(max(0, min(progress, 1))))
+                Capsule()
+                    .fill(Color.white.opacity(0.28))
+                    .frame(width: width * CGFloat(max(0, min(progress, 1))), height: 3)
+                    .offset(y: -2)
             }
         }
         .animation(.easeInOut(duration: 0.45), value: progress)
@@ -21,7 +25,7 @@ struct ProgressBarView: View {
         if progress >= 1 {
             return LinearGradient(colors: [Theme.expense, Theme.expense.opacity(0.7)], startPoint: .leading, endPoint: .trailing)
         }
-        return LinearGradient(colors: [Theme.accent, Theme.accent.opacity(0.7)], startPoint: .leading, endPoint: .trailing)
+        return Theme.progressGradient
     }
 }
 

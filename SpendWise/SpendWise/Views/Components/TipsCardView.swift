@@ -4,43 +4,71 @@ struct TipsCardView: View {
     @ObservedObject var viewModel: TipsViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-            HStack(spacing: 8) {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .foregroundStyle(Theme.accent)
-                Text("Exchange Rates")
-                    .font(Theme.subtitleFont)
-                    .foregroundStyle(Theme.textPrimary)
-                Spacer()
-                Button("Update") {
-                    viewModel.fetchTip()
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Theme.accentSoft)
+                        .frame(width: 30, height: 30)
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
                 }
-                .font(Theme.captionFont)
-                .buttonStyle(.bordered)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Exchange Rates")
+                        .font(Theme.subtitleFont)
+                        .foregroundStyle(Theme.textPrimary)
+                    stateBadge
+                }
+
+                Spacer()
+
+                Button {
+                    viewModel.fetchTip()
+                } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                        .font(Theme.captionFont)
+                }
+                .buttonStyle(.borderedProminent)
                 .tint(Theme.accent)
+                .controlSize(.small)
             }
 
             content
         }
-        .cardStyle()
+        .cardStyle(background: Theme.elevatedBackground.opacity(0.82))
     }
 
     @ViewBuilder
     private var content: some View {
         switch viewModel.state {
         case .idle:
-            Text("Tap update to fetch the latest rates.")
+            Text("Tap refresh to fetch the latest rates.")
                 .font(Theme.bodyFont)
                 .foregroundStyle(Theme.textSecondary)
         case .loading:
-            ProgressView()
+            HStack(spacing: 10) {
+                ProgressView()
+                Text("Loading market data...")
+                    .font(Theme.bodyFont)
+                    .foregroundStyle(Theme.textSecondary)
+            }
         case .success:
             if let tip = viewModel.tip {
                 VStack(alignment: .leading, spacing: Theme.compactSpacing) {
-                    Text(tip.text)
-                        .font(.system(.callout, design: .monospaced))
-                        .foregroundStyle(Theme.textPrimary)
-                        .lineSpacing(4)
+                    ForEach(tip.text.components(separatedBy: "\n"), id: \.self) { line in
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(Theme.accent)
+                                .frame(width: 5, height: 5)
+                            Text(line)
+                                .font(Theme.bodyFont)
+                                .foregroundStyle(Theme.textPrimary)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.9)
+                        }
+                    }
                     Text(tip.author)
                         .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
@@ -59,6 +87,30 @@ struct TipsCardView: View {
                     .foregroundStyle(Theme.textSecondary)
             }
         }
+    }
+
+    @ViewBuilder
+    private var stateBadge: some View {
+        switch viewModel.state {
+        case .idle:
+            badge(text: "Idle", color: Theme.textSecondary)
+        case .loading:
+            badge(text: "Updating", color: Theme.accentAlt)
+        case .success:
+            badge(text: "Live", color: Theme.income)
+        case .error:
+            badge(text: "Error", color: Theme.expense)
+        }
+    }
+
+    private func badge(text: String, color: Color) -> some View {
+        Text(text)
+            .font(Theme.captionFont)
+            .foregroundStyle(color)
+            .padding(.vertical, 3)
+            .padding(.horizontal, 8)
+            .background(color.opacity(0.12))
+            .clipShape(Capsule())
     }
 }
 

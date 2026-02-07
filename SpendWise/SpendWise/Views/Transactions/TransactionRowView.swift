@@ -6,34 +6,52 @@ struct TransactionRowView: View {
     @AppStorage("currencyCode") private var currencyCode = "KZT"
 
     var body: some View {
-        HStack(alignment: .top, spacing: Theme.spacing) {
+        HStack(alignment: .center, spacing: Theme.spacing) {
             iconBadge
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(transaction.title)
                     .font(Theme.subtitleFont)
                     .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.9)
 
                 HStack(spacing: 6) {
                     categoryBadge
                     Text(dateString)
                         .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                 }
             }
+            .layoutPriority(1)
 
             Spacer(minLength: Theme.compactSpacing)
 
             VStack(alignment: .trailing, spacing: 4) {
                 Text(amountString)
-                    .font(Theme.subtitleFont)
+                    .font(Theme.bodyFont.weight(.semibold))
                     .foregroundStyle(transaction.type == .income ? Theme.income : Theme.expense)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.55)
+                    .allowsTightening(true)
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background(
+                        (transaction.type == .income ? Theme.incomeSoft : Theme.expenseSoft)
+                            .opacity(0.9)
+                    )
+                    .clipShape(Capsule())
                 if transaction.isRecurring {
                     Text("Recurring")
                         .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
                 }
             }
+            .frame(minWidth: 110, maxWidth: 150, alignment: .trailing)
         }
         .padding(.vertical, 8)
     }
@@ -54,13 +72,15 @@ struct TransactionRowView: View {
         Text(transaction.category.title)
             .font(Theme.captionFont)
             .foregroundStyle(Theme.textSecondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
-            .background(Theme.elevatedBackground)
+            .background(Theme.elevatedBackground.opacity(0.8))
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(Theme.separator.opacity(0.4), lineWidth: 1)
+                    .stroke(Theme.separator.opacity(0.22), lineWidth: 1)
             )
     }
 
@@ -71,7 +91,7 @@ struct TransactionRowView: View {
 
     private var dateString: String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
+        formatter.setLocalizedDateFormatFromTemplate("d MMM")
         return formatter.string(from: transaction.date)
     }
 

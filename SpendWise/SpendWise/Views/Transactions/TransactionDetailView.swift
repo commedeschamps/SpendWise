@@ -10,29 +10,29 @@ struct TransactionDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.spacing) {
+                amountHero
                 detailCard
 
                 Button {
                     viewModel.toggleRecurring(for: currentTransaction)
                 } label: {
                     Label(
-                        currentTransaction.isRecurring ? "Recurring" : "Not Recurring",
+                        currentTransaction.isRecurring ? "Turn Off Recurring" : "Set as Recurring",
                         systemImage: currentTransaction.isRecurring ? "arrow.triangle.2.circlepath" : "arrow.triangle.2.circlepath.circle"
                     )
-                    .font(Theme.subtitleFont)
-                    .foregroundStyle(Theme.accent)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Theme.compactSpacing)
                 }
-                .cardStyle(background: Theme.elevatedBackground)
+                .buttonStyle(PrimaryActionButtonStyle())
             }
             .padding(Theme.spacing)
         }
         .navigationTitle("Details")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Edit") {
+                Button {
                     showingEditForm = true
+                } label: {
+                    Label("Edit", systemImage: "square.and.pencil")
+                        .font(Theme.captionFont)
                 }
             }
         }
@@ -41,33 +41,56 @@ struct TransactionDetailView: View {
                 viewModel.updateTransaction(updated)
             }
         }
-        .background(Theme.background)
+        .background {
+            AppBackgroundView()
+        }
+    }
+
+    private var amountHero: some View {
+        VStack(alignment: .leading, spacing: Theme.compactSpacing) {
+            HStack {
+                Text(currentTransaction.type.title)
+                    .font(Theme.captionFont)
+                    .foregroundStyle(currentTransaction.type == .income ? Theme.income : Theme.expense)
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background((currentTransaction.type == .income ? Theme.incomeSoft : Theme.expenseSoft).opacity(0.9))
+                    .clipShape(Capsule())
+                Spacer()
+                Text(dateString)
+                    .font(Theme.captionFont)
+                    .foregroundStyle(Theme.textSecondary)
+            }
+
+            Text(formattedSignedAmount(currentTransaction))
+                .font(Theme.heroAmountFont)
+                .foregroundStyle(currentTransaction.type == .income ? Theme.income : Theme.expense)
+                .monospacedDigit()
+
+            Text(currentTransaction.title)
+                .font(Theme.subtitleFont)
+                .foregroundStyle(Theme.textPrimary)
+        }
+        .cardStyle(background: Theme.heroGradient)
     }
 
     private var detailCard: some View {
         VStack(alignment: .leading, spacing: Theme.compactSpacing) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(currentTransaction.title)
-                        .font(Theme.titleFont)
+                    Text("Transaction Info")
+                        .font(Theme.subtitleFont)
                         .foregroundStyle(Theme.textPrimary)
-                    Text("\(currentTransaction.category.title) - \(dateString)")
+                    Text(currentTransaction.category.title)
                         .font(Theme.captionFont)
                         .foregroundStyle(Theme.textSecondary)
                 }
                 Spacer()
-                Text(currentTransaction.type.title)
-                    .font(Theme.captionFont.weight(.semibold))
-                    .foregroundStyle(currentTransaction.type == .income ? Theme.income : Theme.expense)
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 8)
-                    .background(currentTransaction.type == .income ? Theme.incomeSoft : Theme.expenseSoft)
-                    .clipShape(Capsule())
             }
 
             Divider()
 
-            detailRow(label: "Amount", value: Currency.format(currentTransaction.amount, code: currencyCode))
+            detailRow(label: "Amount", value: Currency.format(currentTransaction.amount, code: currencyCode), isAccent: true)
             detailRow(label: "Recurring", value: currentTransaction.isRecurring ? "Yes" : "No")
             detailRow(label: "Created", value: createdDateString)
 
@@ -83,7 +106,7 @@ struct TransactionDetailView: View {
         .cardStyle()
     }
 
-    private func detailRow(label: String, value: String) -> some View {
+    private func detailRow(label: String, value: String, isAccent: Bool = false) -> some View {
         HStack {
             Text(label)
                 .font(Theme.bodyFont)
@@ -91,7 +114,7 @@ struct TransactionDetailView: View {
             Spacer()
             Text(value)
                 .font(Theme.bodyFont.weight(.semibold))
-                .foregroundStyle(Theme.textPrimary)
+                .foregroundStyle(isAccent ? Theme.accent : Theme.textPrimary)
         }
     }
 
@@ -110,6 +133,11 @@ struct TransactionDetailView: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: currentTransaction.createdAt)
+    }
+
+    private func formattedSignedAmount(_ transaction: Transaction) -> String {
+        let sign = transaction.type == .expense ? "-" : "+"
+        return "\(sign)\(Currency.format(abs(transaction.amount), code: currencyCode))"
     }
 }
 
